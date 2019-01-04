@@ -42,7 +42,7 @@
     BASIC_RF_AUX_HDR_LENGTH - BASIC_RF_LEN_MIC)
 #define BASIC_RF_ACK_PACKET_SIZE	        5
 #define BASIC_RF_FOOTER_SIZE                2
-#define BASIC_RF_HDR_SIZE                   10
+#define BASIC_RF_HDR_SIZE                   10 //(1+2+1+2+2+2) ref:23.7
 
 // The time it takes for the acknowledgment packet to be received after the
 // data packet has been transmitted.
@@ -236,9 +236,6 @@ static void basicRfRxFrmDoneIsr(void)
 {
     basicRfPktHdr_t *pHdr;
     uint8 *pStatusWord;
-    #ifdef SECURITY_CCM
-    uint8 authStatus=0;
-    #endif
 
     // Map header to packet buffer
     pHdr= (basicRfPktHdr_t*)rxMpdu;
@@ -264,9 +261,6 @@ static void basicRfRxFrmDoneIsr(void)
     	UINT16_NTOH(pHdr->panId);
     	UINT16_NTOH(pHdr->destAddr);
     	UINT16_NTOH(pHdr->srcAddr);
-        #ifdef SECURITY_CCM
-        UINT32_NTOH(pHdr->frameCounter);
-        #endif
 
         rxi.ackRequest = !!(pHdr->fcf0 & BASIC_RF_FCF_ACK_BM_L);
 
@@ -282,25 +276,16 @@ static void basicRfRxFrmDoneIsr(void)
     } else {
 
         // It is assumed that the radio rejects packets with invalid length.
-        // Subtract the number of bytes in the frame overhead to get actual payload.
+        // Subtract the number of bytes in the frame overhead to get actual payload.(MAC Payload)23.7
 
         rxi.length = pHdr->packetLength - BASIC_RF_PACKET_OVERHEAD_SIZE;
 
-        #ifdef SECURITY_CCM
-        rxi.length -= (BASIC_RF_AUX_HDR_LENGTH + BASIC_RF_LEN_MIC);
-        authStatus = halRfReadRxBufSecure(&rxMpdu[1], pHdr->packetLength, rxi.length,
-                                        BASIC_RF_LEN_AUTH, BASIC_RF_SECURITY_M);
-        #else
-        halRfReadRxBuf(&rxMpdu[1], pHdr->packetLength);
-        #endif
-
+        halRfReadRxBuf(&rxMpdu[1], pHdr->packetLength);// read the whole PSDU. ref:23.7
+        
         // Make sure byte fields are changed from network to host byte order
     	UINT16_NTOH(pHdr->panId);
     	UINT16_NTOH(pHdr->destAddr);
     	UINT16_NTOH(pHdr->srcAddr);
-        #ifdef SECURITY_CCM
-        UINT32_NTOH(pHdr->frameCounter);
-        #endif
 
         rxi.ackRequest = !!(pHdr->fcf0 & BASIC_RF_FCF_ACK_BM_L);
 
@@ -311,28 +296,16 @@ static void basicRfRxFrmDoneIsr(void)
         rxi.pPayload = rxMpdu + BASIC_RF_HDR_SIZE;
 
         // Read the FCS to get the RSSI and CRC
-        pStatusWord= rxi.pPayload+rxi.length;
-        #ifdef SECURITY_CCM
-        pStatusWord+= BASIC_RF_LEN_MIC;
-        #endif
-        rxi.rssi = pStatusWord[0];
+        pStatusWord= rxi.pPayload+rxi.length; // pStatusWord will point to FCS. ref:23.7
+
+        rxi.rssi = pStatusWord[0];// ref:23.9.7
 
         // Notify the application about the received data packet if the CRC is OK
         // Throw packet if the previous packet had the same sequence number
         if( (pStatusWord[1] & BASIC_RF_CRC_OK_BM) && (rxi.seqNumber != pHdr->seqNumber) ) {
-            // If security is used check also that authentication passed
-            #ifdef SECURITY_CCM
-            if( authStatus==SUCCESS ) {
-                if ( (pHdr->fcf0 & BASIC_RF_FCF_BM_L) ==
-                    (BASIC_RF_FCF_NOACK_L | BASIC_RF_SEC_ENABLED_FCF_BM_L)) {
-                        rxi.isReady = TRUE;
-                }
-            }
-            #else
             if ( ((pHdr->fcf0 & (BASIC_RF_FCF_BM_L)) == BASIC_RF_FCF_NOACK_L) ) {
                 rxi.isReady = TRUE;
             }              
-            #endif
         }
         rxi.seqNumber = pHdr->seqNumber;
     }
@@ -366,7 +339,7 @@ uint8 basicRfInit(basicRfCfg_t* pRfConfig)
     if (halRfInit()==FAILED)
         return FAILED;
 
-    halIntOff();
+    halIntOff();//IEN0, Turns global interrupts off. RFERRIE
 
     // Set the protocol configuration
     pConfig = pRfConfig;
@@ -381,11 +354,6 @@ uint8 basicRfInit(basicRfCfg_t* pRfConfig)
     // Write the short address and the PAN ID to the CC2520 RAM
     halRfSetShortAddr(pConfig->myAddr);
     halRfSetPanId(pConfig->panId);
-
-    // if security is enabled, write key and nonce
-    #ifdef SECURITY_CCM
-    basicRfSecurityInit(pConfig);
-    #endif
 
     // Set up receive interrupt (received data or acknowlegment)
     halRfRxInterruptConfig(basicRfRxFrmDoneIsr);
@@ -431,12 +399,7 @@ uint8 basicRfSendPacket(uint16 destAddr, uint8* pPayload, uint8 length)
 
     mpduLength = basicRfBuildMpdu(destAddr, pPayload, length);
 
-    #ifdef SECURITY_CCM
-    halRfWriteTxBufSecure(txMpdu, mpduLength, length, BASIC_RF_LEN_AUTH, BASIC_RF_SECURITY_M);
-    txState.frameCounter++;     // Increment frame counter field
-    #else
     halRfWriteTxBuf(txMpdu, mpduLength);
-    #endif
 
     // Turn on RX frame done interrupt for ACK reception
     halRfEnableRxInterrupt();
@@ -511,8 +474,8 @@ uint8 basicRfReceive(uint8* pRxData, uint8 len, int16* pRssi)
 {
     // Accessing shared variables -> this is a critical region
     // Critical region start
-    halIntOff();
-    memcpy(pRxData, rxi.pPayload, min(rxi.length, len));
+    halIntOff();// EA = 0
+    memcpy(pRxData, rxi.pPayload, min(rxi.length, len));// copy from rxi.pPayload to pRxData
     if(pRssi != NULL) {
         if(rxi.rssi < 128){
             *pRssi = rxi.rssi - halRfGetRssiOffset();
@@ -598,7 +561,7 @@ void basicRfReceiveOff(void)
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED �AS IS� WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ���AS IS��� WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,

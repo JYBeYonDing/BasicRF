@@ -151,7 +151,7 @@ static void halPaLnaInit(void);
 */
 uint8 halRfInit(void)
 {
-    // Enable auto ack and auto crc
+    // Enable auto ack and auto crc //p259
     FRMCTRL0 |= (AUTO_ACK | AUTO_CRC);
 
     // Recommended RX settings
@@ -161,8 +161,6 @@ uint8 halRfInit(void)
 
     // Enable random generator -> Not implemented yet
 
-    // Enable CC2591 with High Gain Mode
-    halPaLnaInit();
 
     // Enable RX interrupt
     halRfEnableRxInterrupt();
@@ -441,7 +439,7 @@ uint8 halRfWriteMemory(uint16 addr, uint8* pData, uint8 length)
 /***********************************************************************************
 * @fn      halRfTransmit
 *
-* @brief   Transmit frame with Clear Channel Assessment.
+* @brief   Transmit frame with NO Clear Channel Assessment.
 *
 * @param   none
 *
@@ -525,7 +523,7 @@ void halRfDisableRxInterrupt(void)
 */
 void halRfEnableRxInterrupt(void)
 {
-    // enable RXPKTDONE interrupt
+    // enable RXPKTDONE interrupt // have received a packet
     RFIRQM0 |= BV(6);
     // enable general RF interrupts
     IEN2 |= BV(0);
@@ -639,7 +637,7 @@ works of, modify, distribute, perform, display or sell this Software and/or
 its documentation for any purpose.
 
 YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-PROVIDED ���AS IS��� WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+PROVIDED ���������AS IS��������� WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
 INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
 NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
 TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,

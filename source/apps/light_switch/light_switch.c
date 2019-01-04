@@ -107,8 +107,6 @@ static uint8 appSelectMode(void);
 */
 static void appLight()
 {
-    halLcdWriteLine(HAL_LCD_LINE_1, "Light");
-    halLcdWriteLine(HAL_LCD_LINE_2, "Ready");
 #ifdef ASSY_EXP4618_CC2420
     halLcdClearLine(1);
     halLcdWriteSymbol(HAL_LCD_SYMBOL_RX, 1);
@@ -123,7 +121,7 @@ static void appLight()
 
     // Main loop
     while (TRUE) {
-        while(!basicRfPacketIsReady());
+        while(!basicRfPacketIsReady());// wait until receive a packet
 
         if(basicRfReceive(pRxData, APP_PAYLOAD_LENGTH, NULL)>0) {
             if(pRxData[0] == LIGHT_TOGGLE_CMD) {
@@ -149,14 +147,7 @@ static void appLight()
 */
 static void appSwitch()
 {
-    halLcdWriteLine(HAL_LCD_LINE_1, "Switch");
-    halLcdWriteLine(HAL_LCD_LINE_2, "Joystick Push");
-    halLcdWriteLine(HAL_LCD_LINE_3, "Send Command");
-#ifdef ASSY_EXP4618_CC2420
-    halLcdClearLine(1);
-    halLcdWriteSymbol(HAL_LCD_SYMBOL_TX, 1);
-#endif
-
+  
     pTxData[0] = LIGHT_TOGGLE_CMD;
 
     // Initialize BasicRF
@@ -206,9 +197,6 @@ void main(void)
     basicRfConfig.panId = PAN_ID;
     basicRfConfig.channel = RF_CHANNEL;
     basicRfConfig.ackRequest = TRUE;
-#ifdef SECURITY_CCM
-    basicRfConfig.securityKey = key;
-#endif
 
     // Initalise board peripherals
     halBoardInit();
@@ -221,9 +209,6 @@ void main(void)
 
     // Indicate that device is powered
     halLedSet(1);
-
-    // Print Logo and splash screen on LCD
-    utilPrintLogo("Light Switch");
 
     // Wait for user to press S1 to enter menu
     while (halButtonPushed()!=HAL_BUTTON_1);
@@ -282,7 +267,7 @@ static uint8 appSelectMode(void)
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED �AS IS� WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ���AS IS��� WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
