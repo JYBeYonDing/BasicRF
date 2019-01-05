@@ -49,10 +49,14 @@
 #define IRQ_TXDONE                 0x02
 #define IRQ_RXPKTDONE              0x40
 
+// FSMSTAT1 (0x6193) Radio Status Register
+#define SAMPLED_CCA                0x08
+
 // Selected strobes
 #define ISRXON()                st(RFST = 0xE3;)
 #define ISTXON()                st(RFST = 0xE9;)
 #define ISTXONCCA()             st(RFST = 0xEA;)
+#define ISSAMPLECCA()           st(RFST = 0xEB;)
 #define ISRFOFF()               st(RFST = 0xEF;)
 #define ISFLUSHRX()             st(RFST = 0xEC;)
 #define ISFLUSHTX()             st(RFST = 0xEE;)
@@ -460,6 +464,54 @@ uint8 halRfTransmit(void)
     return status;
 }
 
+/***********************************************************************************
+* @fn      halRfTransmitOnCCA
+*
+* @brief   Transmit frame with Clear Channel Assessment.
+*
+* @param   none
+*
+* @return  uint8 - SUCCESS or FAILED
+*/
+uint8 halRfTransmitOnCCA(void)
+{
+    uint8 status;
+    uint8 CCA = 0;
+
+    while(!CCA){
+        ISSAMPLECCA();
+        ISTXONCCA();
+        ISRXON();
+        
+        CCA = FSMSTAT1 & SAMPLED_CCA;
+    }
+
+    // set a timer to backoff
+    int T = 100;
+    while(T!=0){
+        T--;
+        ISSAMPLECCA();
+        ISTXONCCA();
+        ISRXON();
+    
+        CCA = FSMSTAT1 & SAMPLED_CCA;
+        
+        if( 0 == CCA ){
+           // To do something if channel is busy.
+          
+        }
+    }
+    
+    ISTXONCCA();
+
+    // Waiting for transmission to finish
+    while(!(RFIRQF1 & IRQ_TXDONE) );
+
+    RFIRQF1 = ~IRQ_TXDONE;
+    status= SUCCESS;
+
+    return status;
+}
 
 
 /***********************************************************************************
