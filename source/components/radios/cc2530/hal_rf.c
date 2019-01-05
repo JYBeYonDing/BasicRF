@@ -497,8 +497,8 @@ uint8 halRfTransmitOnCCA(void)
         CCA = FSMSTAT1 & SAMPLED_CCA;
         
         if( 0 == CCA ){
-           // To do something if channel is busy.
-          
+            // stop timer if channel is busy.
+            T++;
         }
     }
     
