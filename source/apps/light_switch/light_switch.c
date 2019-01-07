@@ -161,17 +161,9 @@ static void appSwitch()
 
     // Main loop
     while (TRUE) {
-        if( halJoystickPushed() ) {
 
             basicRfSendPacket(LIGHT_ADDR, pTxData, APP_PAYLOAD_LENGTH);
 
-            // Put MCU to sleep. It will wake up on joystick interrupt
-            halIntOff();
-            halMcuSetLowPowerMode(HAL_MCU_LPM_3); // Will turn on global
-            // interrupt enable
-            halIntOn();
-
-        }
     }
 }
 
@@ -200,37 +192,17 @@ void main(void)
 
     // Initalise board peripherals
     halBoardInit();
-    halJoystickInit();
 
     // Initalise hal_rf
     if(halRfInit()==FAILED) {
       HAL_ASSERT(FALSE);
     }
 
-    // Indicate that device is powered
-    halLedSet(1);
-
-    // Wait for user to press S1 to enter menu
-    while (halButtonPushed()!=HAL_BUTTON_1);
-    halMcuWaitMs(350);
     halLcdClear();
 
-    // Set application role
-    appMode = appSelectMode();
-    halLcdClear();
+    appSwitch();
 
-    // Transmitter application
-    if(appMode == SWITCH) {
-        // No return from here
-        appSwitch();
-    }
-    // Receiver application
-    else if(appMode == LIGHT) {
-        // No return from here
-        appLight();
-    }
-    // Role is undefined. This code should not be reached
-    HAL_ASSERT(FALSE);
+
 }
 
 
@@ -267,7 +239,7 @@ static uint8 appSelectMode(void)
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿?WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
