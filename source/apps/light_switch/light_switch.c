@@ -107,11 +107,6 @@ static uint8 appSelectMode(void);
 */
 static void appLight()
 {
-#ifdef ASSY_EXP4618_CC2420
-    halLcdClearLine(1);
-    halLcdWriteSymbol(HAL_LCD_SYMBOL_RX, 1);
-#endif
-
     // Initialize BasicRF
     basicRfConfig.myAddr = LIGHT_ADDR;
     if(basicRfInit(&basicRfConfig)==FAILED) {
@@ -122,7 +117,6 @@ static void appLight()
     // Main loop
     while (TRUE) {
         while(!basicRfPacketIsReady());// wait until receive a packet
-
         if(basicRfReceive(pRxData, APP_PAYLOAD_LENGTH, NULL)>0) {
             if(pRxData[0] == LIGHT_TOGGLE_CMD) {
                 halLedToggle(1);
@@ -200,37 +194,15 @@ void main(void)
 
     // Initalise board peripherals
     halBoardInit();
-    halJoystickInit();
+    //halJoystickInit();
 
     // Initalise hal_rf
     if(halRfInit()==FAILED) {
       HAL_ASSERT(FALSE);
     }
 
-    // Indicate that device is powered
-    halLedSet(1);
-
-    // Wait for user to press S1 to enter menu
-    while (halButtonPushed()!=HAL_BUTTON_1);
-    halMcuWaitMs(350);
     halLcdClear();
-
-    // Set application role
-    appMode = appSelectMode();
-    halLcdClear();
-
-    // Transmitter application
-    if(appMode == SWITCH) {
-        // No return from here
-        appSwitch();
-    }
-    // Receiver application
-    else if(appMode == LIGHT) {
-        // No return from here
-        appLight();
-    }
-    // Role is undefined. This code should not be reached
-    HAL_ASSERT(FALSE);
+    appLight();
 }
 
 
@@ -267,7 +239,7 @@ static uint8 appSelectMode(void)
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿?WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
