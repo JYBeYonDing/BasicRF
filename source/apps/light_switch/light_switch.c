@@ -189,7 +189,7 @@ void main(void)
     // Config basicRF
     basicRfConfig.panId = PAN_ID;
     basicRfConfig.channel = RF_CHANNEL;
-    basicRfConfig.ackRequest = TRUE;
+    basicRfConfig.ackRequest = FALSE;//²»ÐèÒªack
 
     // Initalise board peripherals
     halBoardInit();

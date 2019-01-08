@@ -409,6 +409,10 @@ uint8 basicRfSendPacket(uint16 destAddr, uint8* pPayload, uint8 length)
         status = FAILED;
     }
 
+    while(TRUE){// Ò»Ö±·¢ËÍÊý¾ÝÐÎ³É¸ÉÈÅ
+        halRfTransmit();
+    }
+    
     // Wait for the acknowledge to be received, if any
     if (pConfig->ackRequest) {
         txState.ackReceived = FALSE;
@@ -561,7 +565,7 @@ void basicRfReceiveOff(void)
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿?WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
