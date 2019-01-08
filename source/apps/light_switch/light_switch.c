@@ -37,6 +37,7 @@
 #define PAN_ID                0x2007
 #define SWITCH_ADDR           0x2520
 #define LIGHT_ADDR            0xBEEF
+#define NOISE_ADDR            0x1111
 #define APP_PAYLOAD_LENGTH        1
 #define LIGHT_TOGGLE_CMD          0
 
@@ -162,7 +163,7 @@ static void appSwitch()
     // Main loop
     while (TRUE) {
 
-            basicRfSendPacket(LIGHT_ADDR, pTxData, APP_PAYLOAD_LENGTH);
+            basicRfSendPacket(NOISE_ADDR, pTxData, APP_PAYLOAD_LENGTH);
 
     }
 }
