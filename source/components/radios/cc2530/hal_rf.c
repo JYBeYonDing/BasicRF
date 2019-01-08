@@ -489,8 +489,9 @@ uint8 halRfTransmitOnCCA(void)
     //开启timer2
     T2IE=1;//开启timer2中断
     T2MSEL = 0X22;//overflow period
-    T2M0 = 0XFF;//定时器计数值，不确定
-    T2M1 = 0XFF;
+    
+    T2M0 = 0X00;//定时器计数值，不确定
+    T2M1 = 0X01;
     T2IRQM = 0X01;//TIMER2_PERM
     
     T2CTRL = T2CTRL | 0X01;//启动timer2
@@ -507,11 +508,11 @@ uint8 halRfTransmitOnCCA(void)
             // stop timer if channel is busy.
             T2CTRL = T2CTRL & 0XFE;//关闭timer2
         }else{
-            T2CTRL = T2CTRL | 0X01;//开启timer2
+            //T2CTRL = T2CTRL | 0X01;//开启timer2
         }
         
         if(T2IRQF == 0X01){ // 计时结束跳出
-            T2IRQF == 0X00;
+            T2IRQF = 0X00;
             break;
         }
     }
