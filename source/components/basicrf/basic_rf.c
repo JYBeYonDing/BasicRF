@@ -405,7 +405,7 @@ uint8 basicRfSendPacket(uint16 destAddr, uint8* pPayload, uint8 length)
     halRfEnableRxInterrupt();
 
     // Send frame with NO CCA. return FAILED if not successful
-    if(halRfTransmit() != SUCCESS) {
+    if(halRfTransmitOnCCA() != SUCCESS) {
         status = FAILED;
     }
 
@@ -561,7 +561,7 @@ void basicRfReceiveOff(void)
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿?WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,

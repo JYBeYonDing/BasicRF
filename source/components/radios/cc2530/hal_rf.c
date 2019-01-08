@@ -480,25 +480,39 @@ uint8 halRfTransmitOnCCA(void)
 
     while(!CCA){
         ISSAMPLECCA();
-        ISTXONCCA();
-        ISRXON();
+        //ISTXONCCA();
+        //ISRXON();
         
         CCA = FSMSTAT1 & SAMPLED_CCA;
     }
 
+    //¿ªÆôtimer2
+    T2IE=1;//¿ªÆôtimer2ÖÐ¶Ï
+    T2MSEL = 0X22;//overflow period
+    T2M0 = 0XFF;//¶¨Ê±Æ÷¼ÆÊýÖµ£¬²»È·¶¨
+    T2M1 = 0XFF;
+    T2IRQM = 0X01;//TIMER2_PERM
+    
+    T2CTRL = T2CTRL | 0X01;//Æô¶¯timer2
+    
     // set a timer to backoff
-    int T = 100;
-    while(T!=0){
-        T--;
+    while(TRUE){
         ISSAMPLECCA();
-        ISTXONCCA();
-        ISRXON();
+        //ISTXONCCA();
+        //ISRXON();
     
         CCA = FSMSTAT1 & SAMPLED_CCA;
         
         if( 0 == CCA ){
             // stop timer if channel is busy.
-            T++;
+            T2CTRL = T2CTRL & 0XFE;//¹Ø±Õtimer2
+        }else{
+            T2CTRL = T2CTRL | 0X01;//¿ªÆôtimer2
+        }
+        
+        if(T2IRQF == 0X01){ // ¼ÆÊ±½áÊøÌø³ö
+            T2IRQF == 0X00;
+            break;
         }
     }
     
@@ -689,7 +703,7 @@ works of, modify, distribute, perform, display or sell this Software and/or
 its documentation for any purpose.
 
 YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-PROVIDED ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+PROVIDED ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿?WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
 INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
 NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
 TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,

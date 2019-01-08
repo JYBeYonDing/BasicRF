@@ -92,7 +92,11 @@ static uint8 key[]= {
 static void appLight();
 static void appSwitch();
 static uint8 appSelectMode(void);
-
+static void InitT1()
+{
+    T1CTL = 0x0d;       //128·ÖÆµ,×Ô¶¯ÖØ×° 0x0000-0xFFFF 
+    T1STAT= 0x21;       //Í¨µÀ0,ÖÐ¶ÏÓÐÐ§   
+}
 
 /***********************************************************************************
 * @fn          appLight
@@ -159,18 +163,18 @@ static void appSwitch()
     // Keep Receiver off when not needed to save power
     basicRfReceiveOff();
 
+
+    int count = 0;
     // Main loop
     while (TRUE) {
-        if( halJoystickPushed() ) {
-
-            basicRfSendPacket(LIGHT_ADDR, pTxData, APP_PAYLOAD_LENGTH);
-
-            // Put MCU to sleep. It will wake up on joystick interrupt
-            halIntOff();
-            halMcuSetLowPowerMode(HAL_MCU_LPM_3); // Will turn on global
-            // interrupt enable
-            halIntOn();
-
+        if(T1IF==1){
+            T1IF == 0;
+            count++;
+            if(count>=4){
+                count = 0;
+                // Ã¿Á½Ãë½øÈëÒ»´Î
+                basicRfSendPacket(LIGHT_ADDR, pTxData, APP_PAYLOAD_LENGTH);
+            }
         }
     }
 }
@@ -193,6 +197,8 @@ void main(void)
 {
     uint8 appMode = NONE;
 
+    InitT1();//³õÊ¼»¯¶¨Ê±Æ÷1
+    
     // Config basicRF
     basicRfConfig.panId = PAN_ID;
     basicRfConfig.channel = RF_CHANNEL;
@@ -207,30 +213,14 @@ void main(void)
       HAL_ASSERT(FALSE);
     }
 
-    // Indicate that device is powered
-    halLedSet(1);
-
-    // Wait for user to press S1 to enter menu
-    while (halButtonPushed()!=HAL_BUTTON_1);
-    halMcuWaitMs(350);
     halLcdClear();
 
-    // Set application role
-    appMode = appSelectMode();
-    halLcdClear();
 
-    // Transmitter application
-    if(appMode == SWITCH) {
-        // No return from here
-        appSwitch();
-    }
-    // Receiver application
-    else if(appMode == LIGHT) {
-        // No return from here
-        appLight();
-    }
-    // Role is undefined. This code should not be reached
-    HAL_ASSERT(FALSE);
+    appSwitch();
+
+    
+    
+
 }
 
 
@@ -267,7 +257,7 @@ static uint8 appSelectMode(void)
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿?WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
