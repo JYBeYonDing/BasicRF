@@ -75,6 +75,29 @@ int8 halSampleED(uint8 channel, uint16 sampleTime)
   
   return rssi;
 }
+// 返回Received Signal Strength Indication接收的信号强度指示
+int8 halRSSI()
+{
+  int8 rssi=0;
+  halRfReceiveOff(); 
+  // Set RX on
+  halRfReceiveOn();
+  while (!RSSISTAT);//RSSI_VALID 等待RSSI值有效
+  
+  // Enable energy scan mode, using peak signal strength
+  FRMCTRL0 |= 0x10;
+  
+  // Spend sampleTime us accumulating the peak RSSI value
+  halMcuWaitUs(100);
+  
+  rssi = RSSI;
+  // Exit the current channel
+  halRfReceiveOff(); 
+  
+  // Disable ED scan mode
+  FRMCTRL0 &= ~0x10;
+  return rssi;
+}
 
 /***********************************************************************************
 * @fn          halSetRxScanMode
@@ -89,5 +112,5 @@ int8 halSampleED(uint8 channel, uint16 sampleTime)
 void halSetRxScanMode(void)
 {
   // Infinite RX mode (disables symbol search)
-  FRMCTRL0 =  0x0C;   
+  FRMCTRL0 =  0x0C;   // 1100,FRMCTRL0.RX_MODE = 11b 
 }

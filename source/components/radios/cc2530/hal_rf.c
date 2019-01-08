@@ -15,6 +15,7 @@
 #include "hal_assert.h"
 #include "hal_rf.h"
 #include "util.h"
+#include "hal_rf_util.h"
 
 
 /***********************************************************************************
@@ -478,6 +479,13 @@ uint8 halRfTransmitOnCCA(void)
     uint8 status;
     uint8 CCA = 0;
 
+    uint8 TIMER2_PERF = 0;
+
+    rssiOffset= halRfGetRssiOffset();
+    // Set chip in RX scan mode
+    halSetRxScanMode();
+    int8 ppRssi = halRSSI();
+
     while(!CCA){
         ISSAMPLECCA();
         //ISTXONCCA();
@@ -486,15 +494,15 @@ uint8 halRfTransmitOnCCA(void)
         CCA = FSMSTAT1 & SAMPLED_CCA;
     }
 
-    //¿ªÆôtimer2
-    T2IE=1;//¿ªÆôtimer2ÖÐ¶Ï
+    //ï¿½ï¿½ï¿½ï¿½timer2
+    T2IE=1;//ï¿½ï¿½ï¿½ï¿½timer2ï¿½Ð¶ï¿½
     T2MSEL = 0X22;//overflow period
     
-    T2M0 = 0X00;//¶¨Ê±Æ÷¼ÆÊýÖµ£¬²»È·¶¨
-    T2M1 = 0X01;
-    T2IRQM = 0X01;//TIMER2_PERM
+    T2M0 = 0Xff;//ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½È·ï¿½ï¿½
+    T2M1 = 0Xff;
+    T2IRQM = T2IRQM | 0X01;//TIMER2_PERM
     
-    T2CTRL = T2CTRL | 0X01;//Æô¶¯timer2
+    T2CTRL = T2CTRL | 0X01;//ï¿½ï¿½timer2
     
     // set a timer to backoff
     while(TRUE){
@@ -506,13 +514,13 @@ uint8 halRfTransmitOnCCA(void)
         
         if( 0 == CCA ){
             // stop timer if channel is busy.
-            T2CTRL = T2CTRL & 0XFE;//¹Ø±Õtimer2
+            T2CTRL = T2CTRL & 0XFE;//ï¿½Ø±ï¿½timer2
         }else{
-            //T2CTRL = T2CTRL | 0X01;//¿ªÆôtimer2
+            T2CTRL = T2CTRL | 0X01;//ï¿½ï¿½ï¿½ï¿½timer2
         }
-        
-        if(T2IRQF == 0X01){ // ¼ÆÊ±½áÊøÌø³ö
-            T2IRQF = 0X00;
+        TIMER2_PERF = T2IRQF & 0x01;
+        if(TIMER2_PERF == 0X01){ // ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            T2IRQF = T2IRQF & 0XFE;
             break;
         }
     }

@@ -43,6 +43,7 @@ extern "C"
  */
 int8 halSampleED(uint8 channel, uint16 sampleTime);
 void halSetRxScanMode(void);
+int8 halRSSI();//Received Signal Strength Indication接收的信号强度指示
 
 #ifdef __cplusplus
 }

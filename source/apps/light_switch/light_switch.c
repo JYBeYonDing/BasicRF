@@ -168,7 +168,7 @@ static void appSwitch()
     // Main loop
     while (TRUE) {
         if(T1IF==1){
-            T1IF == 0;
+            T1IF = 0;
             count++;
             if(count>=4){
                 count = 0;
@@ -206,7 +206,7 @@ void main(void)
 
     // Initalise board peripherals
     halBoardInit();
-    halJoystickInit();
+    //halJoystickInit();
 
     // Initalise hal_rf
     if(halRfInit()==FAILED) {
@@ -214,7 +214,6 @@ void main(void)
     }
 
     halLcdClear();
-
 
     appSwitch();
 

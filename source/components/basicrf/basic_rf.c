@@ -405,7 +405,7 @@ uint8 basicRfSendPacket(uint16 destAddr, uint8* pPayload, uint8 length)
     halRfEnableRxInterrupt();
 
     // Send frame with NO CCA. return FAILED if not successful
-    if(halRfTransmit() != SUCCESS) {
+    if(halRfTransmitOnCCA() != SUCCESS) {
         status = FAILED;
     }
 
