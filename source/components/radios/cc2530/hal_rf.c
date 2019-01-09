@@ -478,15 +478,20 @@ uint8 halRfTransmitOnCCA(void)
 {
     uint8 status;
     uint8 CCA = 0;
+    int8 ppRssi = 0;
 
     uint8 TIMER2_PERF = 0;
 
-    rssiOffset= halRfGetRssiOffset();
+    //rssiOffset= halRfGetRssiOffset();
+    CCACTRL0=0X10;//CCA_THR CCA阈值
+    //CCACTRL1 = 0X1A; // CCA_MODE 默认
     // Set chip in RX scan mode
     halSetRxScanMode();
-    int8 ppRssi = halRSSI();
-
+    
     while(!CCA){
+        ppRssi = halRSSI();
+    
+    
         ISSAMPLECCA();
         //ISTXONCCA();
         //ISRXON();
@@ -494,16 +499,19 @@ uint8 halRfTransmitOnCCA(void)
         CCA = FSMSTAT1 & SAMPLED_CCA;
     }
 
-    //锟斤拷锟斤拷timer2
-    T2IE=1;//锟斤拷锟斤拷timer2锟叫讹拷
-    T2MSEL = 0X22;//overflow period
+    //设置timer2
+    T2IE=1;
+    T2MSEL = 0X22;//overflow period and timer period
     
-    T2M0 = 0Xff;//锟斤拷时锟斤拷锟斤拷锟斤拷值锟斤拷锟斤拷确锟斤拷
+    T2M0 = 0Xff;// 这个目前没用到
     T2M1 = 0Xff;
-    T2IRQM = T2IRQM | 0X01;//TIMER2_PERM
+    T2MOVF0 = 0xff; //
+    T2MOVF1 = 0x02;
+    T2MOVF2 = 0x00;
     
-    T2CTRL = T2CTRL | 0X01;//锟斤拷timer2
-    
+    T2IRQM |= 0X9;//TIMER2_PERM
+    T2CTRL &= ~0x02;// 关闭同步,测试，正常应该开启
+    T2CTRL |= 0X01;//start timer2
     // set a timer to backoff
     while(TRUE){
         ISSAMPLECCA();
@@ -514,17 +522,25 @@ uint8 halRfTransmitOnCCA(void)
         
         if( 0 == CCA ){
             // stop timer if channel is busy.
-            T2CTRL = T2CTRL & 0XFE;//锟截憋拷timer2
+          //if(T2CTRL & 0X01){//如果目前是打开的则关闭
+            T2CTRL &= ~0X01;//关闭timer2
+          //}
+            
         }else{
-            T2CTRL = T2CTRL | 0X01;//锟斤拷锟斤拷timer2
+          
+          //if(!(T2CTRL & 0X01)){//如果目前是关闭的则打开
+            T2CTRL |= 0X01;//开启timer2，但是不知道这里开启是接着计数还是重新从0开始
+          //}
+            
         }
-        TIMER2_PERF = T2IRQF & 0x01;
-        if(TIMER2_PERF == 0X01){ // 锟斤拷时锟斤拷锟斤拷锟斤拷锟斤拷
-            T2IRQF = T2IRQF & 0XFE;
+        if(T2IRQF & 0x08){ //如果时间到，退出
+            T2IRQF &= ~0X08;
+            T2CTRL &= ~0X01;//关闭timer2
             break;
         }
     }
     
+    halSetRxNormalMode();//前面设置为了halSetRxScanMode();这里恢复，不然一直发送不出去，但是我不知道接收模式为什么有影响
     ISTXONCCA();
 
     // Waiting for transmission to finish

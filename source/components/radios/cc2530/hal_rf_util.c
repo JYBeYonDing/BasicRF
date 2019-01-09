@@ -79,20 +79,20 @@ int8 halSampleED(uint8 channel, uint16 sampleTime)
 int8 halRSSI()
 {
   int8 rssi=0;
-  halRfReceiveOff(); 
+  //halRfReceiveOff(); 
   // Set RX on
-  halRfReceiveOn();
+  //halRfReceiveOn();
   while (!RSSISTAT);//RSSI_VALID 等待RSSI值有效
   
   // Enable energy scan mode, using peak signal strength
   FRMCTRL0 |= 0x10;
   
   // Spend sampleTime us accumulating the peak RSSI value
-  halMcuWaitUs(100);
+  halMcuWaitUs(1000);//us，我不确定这里应该延迟多久，可能不需要能量检测的延时
   
   rssi = RSSI;
   // Exit the current channel
-  halRfReceiveOff(); 
+  //halRfReceiveOff(); 
   
   // Disable ED scan mode
   FRMCTRL0 &= ~0x10;
@@ -112,5 +112,10 @@ int8 halRSSI()
 void halSetRxScanMode(void)
 {
   // Infinite RX mode (disables symbol search)
-  FRMCTRL0 =  0x0C;   // 1100,FRMCTRL0.RX_MODE = 11b 
+  FRMCTRL0 |=  0x0C;   // 1100,FRMCTRL0.RX_MODE = 11b 
+}
+void halSetRxNormalMode(void)
+{
+  // Infinite RX mode (disables symbol search)
+  FRMCTRL0 &=  ~0x0C;   // FRMCTRL0.RX_MODE = 00b 
 }
