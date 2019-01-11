@@ -157,7 +157,9 @@ static void halPaLnaInit(void);
 uint8 halRfInit(void)
 {
     // Enable auto ack and auto crc //p259
-    FRMCTRL0 |= (AUTO_ACK | AUTO_CRC);
+    //FRMCTRL0 |= (AUTO_ACK | AUTO_CRC);
+    FRMCTRL0 |= (AUTO_CRC);// 不需要自动发送确认帧
+
 
     // Recommended RX settings
     TXFILTCFG = 0x09;
@@ -168,7 +170,7 @@ uint8 halRfInit(void)
 
 
     // Enable RX interrupt
-    halRfEnableRxInterrupt();
+    halRfEnableRxInterrupt();//开启信号接受中断
 
     return SUCCESS;
 }

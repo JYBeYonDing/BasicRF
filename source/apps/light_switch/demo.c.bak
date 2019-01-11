@@ -1,7 +1,7 @@
 /***********************************************************************************
   Filename: demo_code.c
 
-  Description:  µ×²ã²¿·Ö²»»áĞ´£¬ÏÈ°ÑÂ·ÓÉ²¿·ÖµÄÂß¼­¿ò¼ÜĞ´ÁËºÃÁË
+  Description:  åº•å±‚éƒ¨åˆ†ä¸ä¼šå†™ï¼Œå…ˆæŠŠè·¯ç”±éƒ¨åˆ†çš„é€»è¾‘æ¡†æ¶å†™äº†å¥½äº†
 
 ***********************************************************************************/
 
@@ -27,13 +27,14 @@
 #define RF_CHANNEL                25      // 2.4 GHz RF channel
 
 // BasicRF address definitions
-#define DEFAULT_PAN_ID                0x0000
-//µØÖ·ÈçºÎ¶¨ÒåµÄ£¿£¿£¿
+#define PAN_ID                0x0000
+//åœ°å€å¦‚ä½•å®šä¹‰çš„ï¼Ÿï¼Ÿï¼Ÿ
 #define CENTER_ADDR           0x2520
-#define MEMBER_ADDR           0xBEEF
-#define SERVER_ADDR           0x0000 //·şÎñÆ÷µÄµØÖ·Îª0£¬¼´idÎª0¡£¸Ğ¾õ²»ÓÃ¶¨Òå£¬¾ÍÊÇ·şÎñÆ÷
+#define MEMBER_ADDR            0xBEEF
+#define SERVER_ADDR 
 
-#define MAC_ADDR              0x0000 //MACµØÖ·£¬µÈÍ¬ÓÚbasicRfCfg_tÖĞµÄmyAddr£¬ĞèÒªÈË¹¤ÉèÖÃ1£¬2£¬3£¬4£¬¡£¡£¡£
+#define MAC_ADDR //MACåœ°å€ï¼Œå¦‚ä½•è·å–ï¼Ÿï¼Ÿï¼Ÿï¼Ÿ
+
 #define APP_PAYLOAD_LENGTH        1
 #define LIGHT_TOGGLE_CMD          0
 
@@ -41,18 +42,18 @@
 #define IDLE                      0
 #define SEND_CMD                  1
 
-//Éè±¸½ÇÉ«
+//è®¾å¤‡è§’è‰²
 #define NONE    0
 #define ROUTE   1
 
-// MEMBERºÍCENTER¶¼ÊôÓÚDEVICE
+// MEMBERå’ŒCENTERéƒ½å±äºDEVICE
 #define MEMBER  1
 #define CENTER  2
 
 #define DEVICE  0
 #define SERVER  1
 
-//Ö¡ÀàĞÍ
+//å¸§ç±»å‹
 #define  BROADCAST 1
 #define  ROUTEACK 2
 #define  REQUEST 3
@@ -61,18 +62,18 @@
 #define  COMMUNICATEACK 6
 #define  DATAPACK 7
 
-//²ÎÊı
-#define MAX_CLUSTER 3   //´ØÈİÁ¿
-#define TOTAL_NODES 20 //È«Íø½Úµã×î´óÊıÁ¿
+//å‚æ•°
+#define MAX_CLUSTER 3   //ç°‡å®¹é‡
+#define TOTAL_NODES 20 //å…¨ç½‘èŠ‚ç‚¹æœ€å¤§æ•°é‡
 
 
-//¶¨Ê±ÖÜÆÚ
-#define CREATE_CLUSTER_LISTEN_TIME  500     //½¨´Ø¼àÌıÊ±ÏŞ
-#define CREATE_CLUSTER_BEACON 100  //½¨´ØÆÚ¼äbeacon·¢ËÍÖÜÆÚ
+//å®šæ—¶å‘¨æœŸ
+#define CREATE_CLUSTER_LISTEN_TIME  500     //å»ºç°‡ç›‘å¬æ—¶é™
+#define CREATE_CLUSTER_BEACON 100  //å»ºç°‡æœŸé—´beaconå‘é€å‘¨æœŸ
 #define WAIT_ACK_TIME   500
-#define TBEACON 10000   //½ÚµãÍ¨Ñ¶beaconÖÜÆÚ
-#define START_ROUTE_TIME 60000  //·şÎñÆ÷·¢ËÍÂ·ÓÉ¹ã²¥Ê±¼ä
-#define SLOT 5 //Ã¿¸öÊ±Ï¶ 5 ms
+#define TBEACON 10000   //èŠ‚ç‚¹é€šè®¯beaconå‘¨æœŸ
+#define START_ROUTE_TIME 60000  //æœåŠ¡å™¨å‘é€è·¯ç”±å¹¿æ’­æ—¶é—´
+#define SLOT 5 //æ¯ä¸ªæ—¶éš™ 5 ms
 
 /***********************************************************************************
 * LOCAL VARIABLES
@@ -111,17 +112,17 @@ static uint8 key[]= {
 #endif
 
 /*
-¶¨ÒåÖ¡¸ñÊ½£¬²Î¿¼Ğ­ÒéÉè¼ÆÎÄµµÖĞÖ¡¸ñÊ½,Õâ²¿·ÖÓ¦¸Ã·Åµ½basic_rf.cÖĞ
+å®šä¹‰å¸§æ ¼å¼ï¼Œå‚è€ƒåè®®è®¾è®¡æ–‡æ¡£ä¸­å¸§æ ¼å¼,è¿™éƒ¨åˆ†åº”è¯¥æ”¾åˆ°basic_rf.cä¸­
 */
 
-//Â·ÓÉ¹ã²¥
+//è·¯ç”±å¹¿æ’­
 typedef struct {
     uint8 TYPE;
     uint32 SA;
     uint32 DA;
     uint32 SERVER_ADDR;
 } Route_Broadcast;
-//Â·ÓÉ»Ø¸´
+//è·¯ç”±å›å¤
 typedef struct {
     uint8 TYPE;
     uint8 HOP;
@@ -130,7 +131,7 @@ typedef struct {
     uint32 DA;
     uint32 LIFETIME;
 }Route_ACK;
-//Èë´ØÇëÇó
+//å…¥ç°‡è¯·æ±‚
 typedef struct {
     uint8 TYPE;
     uint16 LIFETIME;
@@ -138,7 +139,7 @@ typedef struct {
     uint32 SA;
     uint32 FCS;
 }Cluster_Request;
-//Èë´Ø»Ø¸´
+//å…¥ç°‡å›å¤
 typedef struct {
     uint8 TYPE;
     uint16 LIFETIME;
@@ -147,13 +148,13 @@ typedef struct {
     uint8 CLUSTER_ID;
     uint32 FCS;
 }Cluster_Reply;
-//beaconÖ¡
+//beaconå¸§
 typedef struct {
     uint8 TYPE;
     uint16 LIFETIME;
     uint32 SA;
     uint16 INTERVAL;
-    //Ö¡Ìå
+    //å¸§ä½“
     uint16 B_CFP;
     uint16 T_SLOT;
     uint16 B_CAP;
@@ -162,17 +163,17 @@ typedef struct {
     uint8 RECEIVE_ACK[MAX_CLUSTER];
     uint32 FCS;
 }Beacon;
-//Ó¦´ğÖ¡
+//åº”ç­”å¸§
 typedef struct {
     uint8 TYPE;
     uint16 LIFETIME;
     uint32 RA;
     uint32 FCS;
 }Communication_ACK;
-//Êı¾İÖ¡
+//æ•°æ®å¸§
 typedef struct {
     uint8 TYPE;
-    uint8 IF_C2C;//¿ØÖÆÎ»£¬ÅĞ¶ÏÊı¾İÊÇ´Ø¼äÍ¨ĞÅ»¹ÊÇ´ØÄÚÍ¨ĞÅ
+    uint8 IF_C2C;//æ§åˆ¶ä½ï¼Œåˆ¤æ–­æ•°æ®æ˜¯ç°‡é—´é€šä¿¡è¿˜æ˜¯ç°‡å†…é€šä¿¡
     uint16 LIFETIME;
     uint32 RA;
     uint32 SA;
@@ -180,9 +181,9 @@ typedef struct {
     uint32 FCS;
 }Data_Pack;
 
-//ÓÃÀ´Í³Ò»¸÷ÖÖÀàĞÍµÄÖ¡£¬ÒÔ·½±ã×ª»¯Îª±ÈÌØÎ»·¢ËÍ
+//ç”¨æ¥ç»Ÿä¸€å„ç§ç±»å‹çš„å¸§ï¼Œä»¥æ–¹ä¾¿è½¬åŒ–ä¸ºæ¯”ç‰¹ä½å‘é€
 typedef struct {
-    uint8 TYPE;//Ö¸Ê¾Ö¡ÀàĞÍ
+    uint8 TYPE;//æŒ‡ç¤ºå¸§ç±»å‹
     Route_Broadcast     route_broadcast;
     Route_ACK   route_ack; 
     Cluster_Request     cluster_req;
@@ -193,7 +194,7 @@ typedef struct {
 }Packet;
 
 typedef struct {
-    uint32 MAC_ID;//±¾Éè±¸µÄMACµØÖ·
+    uint32 MAC_ID;//æœ¬è®¾å¤‡çš„MACåœ°å€
     uint8 IF_ROUTE;
     uint8 IF_SERVER;
     uint8 IF_CENTER;
@@ -201,37 +202,37 @@ typedef struct {
     uint8 IF_HAVEROUTE;
     uint8 IF_FRIST_ROUTE;
     uint8 IF_ADD_CLUSTER;
-    uint32 Cluster_Member[MAX_CLUSTER];//´ØÄÚ½ÚµãµØÖ·£¬ÊÊÓÃÓÚ±¾Éè±¸ÊÇ´ØÍ·µÄÇé¿ö
-    uint8 Cluster_Member_Num;//´ØÄÚ½ÚµãÊı£¬ÊÊÓÃÓÚ±¾Éè±¸ÊÇ´ØÍ·µÄÇé¿ö
-    uint8 Cluster_ID;//´ØÄÚID£¬ÊÊÓÃÓÚ±¾Éè±¸ÊÇ´Ø³ÉÔ±µÄÇé¿ö
-    uint32 Cluster_Center;//´ØÊ×ID£¬ÊÊÓÃÓÚ±¾Éè±¸ÊÇ´Ø³ÉÔ±µÄÇé¿ö
-    uint32 cluster_membet_access_fail[MAX_CLUSTER];//´ØÄÚ³ÉÔ±½ÓÊÕÈ·ÈÏ£¬ÊÊÓÃÓÚ±¾Éè±¸Îª´ØÍ·,ÅĞ¶ÏÃ¿¸ö´Ø³ÉÔ±µÄÊı¾İÊÇ·ñ½ÓÊÕµ½
+    uint32 Cluster_Member[MAX_CLUSTER];//ç°‡å†…èŠ‚ç‚¹åœ°å€ï¼Œé€‚ç”¨äºæœ¬è®¾å¤‡æ˜¯ç°‡å¤´çš„æƒ…å†µ
+    uint8 Cluster_Member_Num;//ç°‡å†…èŠ‚ç‚¹æ•°ï¼Œé€‚ç”¨äºæœ¬è®¾å¤‡æ˜¯ç°‡å¤´çš„æƒ…å†µ
+    uint8 Cluster_ID//ç°‡å†…IDï¼Œé€‚ç”¨äºæœ¬è®¾å¤‡æ˜¯ç°‡æˆå‘˜çš„æƒ…å†µ
+    uint32 Cluster_Center;//ç°‡é¦–IDï¼Œé€‚ç”¨äºæœ¬è®¾å¤‡æ˜¯ç°‡æˆå‘˜çš„æƒ…å†µ
+    uint32 cluster_membet_access_fail[MAX_CLUSTER];//ç°‡å†…æˆå‘˜æ¥æ”¶ç¡®è®¤ï¼Œé€‚ç”¨äºæœ¬è®¾å¤‡ä¸ºç°‡å¤´,åˆ¤æ–­æ¯ä¸ªç°‡æˆå‘˜çš„æ•°æ®æ˜¯å¦æ¥æ”¶åˆ°
     uint32 SERVER_ID;
     uint32 Next_Route;
-    uint32 ACC_Node_ID[TOTAL_NODES];//½ÓÈëÍøÂçµÄ½Úµã×ÜµØÖ·£¬ÊÊÓÃÓÚ·şÎñÆ÷
-    uint8 ACC_Number;//½ÓÈëÍøÂçµÄ½ÚµãÊı£¬ÊÊÓÃÓÚ·şÎñÆ÷
-    uint8 IF_GET_ACK;//ÊÇ·ñ½ÓÊÕµ½ACK£»
-}Node_Attribute;//½ÚµãÊôĞÔ
+    uint32 ACC_Node_ID[TOTAL_NODES];//æ¥å…¥ç½‘ç»œçš„èŠ‚ç‚¹æ€»åœ°å€ï¼Œé€‚ç”¨äºæœåŠ¡å™¨
+    uint8 ACC_Number;//æ¥å…¥ç½‘ç»œçš„èŠ‚ç‚¹æ•°ï¼Œé€‚ç”¨äºæœåŠ¡å™¨
+    uint8 IF_GET_ACK;//æ˜¯å¦æ¥æ”¶åˆ°ACKï¼›
+}Node_Attributel;//èŠ‚ç‚¹å±æ€§
 
 /***********************************************************************************
 * LOCAL FUNCTIONS
 */
 static void appMemmber();
 static void appCenter();
-static void Set_Up_Cluster();//½¨´Ø¹ı³Ì
+static void Set_Up_Cluster();//å»ºç°‡è¿‡ç¨‹
 static void appServer();
 static uint8 appSelectRole(void);
-static Packet Rx2Pack(RxData *);//º¯ÊıĞèÒª²¹³äĞŞ¸Ä¶¨Òå£¬´«Èë²ÎÊıÎª»º´æÖĞ½ÓÊÕµ½µÄÏûÏ¢ĞòÁĞ£¬½«»º´æÖĞÏûÏ¢ĞòÁĞ×ª»¯ÎªÖ¡,ÏÂÃæÓĞÉè¼ÆË¼Â·
-static void Send_Pack(Packet *);//º¯ÊıĞèÒª²¹³ä¶¨Òå£¬´«Èë²ÎÊıÎªÖ¡£¬½«ĞèÒª·¢ËÍµÄÖ¡·¢ËÍ³öÈ¥
-static void ReceiveHandle(Packet * ,Node_Attribute * );//º¯ÊıĞèÒª²¹³ä¶¨Òå£¬ÓÃÀ´Õë¶Ô½ÓÊÕµ½²»Í¬µÄÖ¡ĞÅĞÄ²»Í¬´¦Àí£¨Èç·¢ËÍ£¬ĞİÃß£©£¬ÏÂÃæÓĞÉè¼ÆË¼Â·
-static uint8 Set_Timer(uint 8);//¶¨Ê±Æ÷£¬µ±¶¨Ê±Æ÷Ê±¼äµ½´ïÊ±·µ»ØÖµÎª0£¬Î´¶¨Òå£¬ĞèÒª²¹³ä»òÕßĞŞ¸Ä
+static Packet Rx2Pack(RxData *);//å‡½æ•°éœ€è¦è¡¥å……ä¿®æ”¹å®šä¹‰ï¼Œä¼ å…¥å‚æ•°ä¸ºç¼“å­˜ä¸­æ¥æ”¶åˆ°çš„æ¶ˆæ¯åºåˆ—ï¼Œå°†ç¼“å­˜ä¸­æ¶ˆæ¯åºåˆ—è½¬åŒ–ä¸ºå¸§,ä¸‹é¢æœ‰è®¾è®¡æ€è·¯
+static void Send_Pack(Packet *);//å‡½æ•°éœ€è¦è¡¥å……å®šä¹‰ï¼Œä¼ å…¥å‚æ•°ä¸ºå¸§ï¼Œå°†éœ€è¦å‘é€çš„å¸§å‘é€å‡ºå»
+static void ReceiveHandle(Packet * ,Node_Attribute * );//å‡½æ•°éœ€è¦è¡¥å……å®šä¹‰ï¼Œç”¨æ¥é’ˆå¯¹æ¥æ”¶åˆ°ä¸åŒçš„å¸§ä¿¡å¿ƒä¸åŒå¤„ç†ï¼ˆå¦‚å‘é€ï¼Œä¼‘çœ ï¼‰ï¼Œä¸‹é¢æœ‰è®¾è®¡æ€è·¯
+static uint8 Set_Timer(uint 8);//å®šæ—¶å™¨ï¼Œå½“å®šæ—¶å™¨æ—¶é—´åˆ°è¾¾æ—¶è¿”å›å€¼ä¸º0ï¼Œæœªå®šä¹‰ï¼Œéœ€è¦è¡¥å……æˆ–è€…ä¿®æ”¹
 //**********************************************************************************************************
-//Rx2Pack ()Éè¼ÆË¼Â·£º
-static Packet Rx2Pack(RxData *rxdata)//RxDateÎªÊÕµ½µÄ¶ş½øÖÆÏûÏ¢ĞòÁĞ
+//Rx2Pack ()è®¾è®¡æ€è·¯ï¼š
+static Packet Rx2Pack(RxData *rxdata)//RxDateä¸ºæ”¶åˆ°çš„äºŒè¿›åˆ¶æ¶ˆæ¯åºåˆ—
 {
     Packet send_pack;
-    //¶ÁÈ¡rxÖĞµÚÒ»¸ö×Ö½Ú£¬»ñµÃÖ¡µÄÀàĞÍ
-   send_pack.TYPE  = rxdata[0:8];//´Ë´¦ÎªpythonĞ´·¨£¬ÒªĞŞ¸Ä¡£¡£¡£
+    //è¯»å–rxä¸­ç¬¬ä¸€ä¸ªå­—èŠ‚ï¼Œè·å¾—å¸§çš„ç±»å‹
+   send_pack.TYPE  = rxdata[0:8];//æ­¤å¤„ä¸ºpythonå†™æ³•ï¼Œè¦ä¿®æ”¹ã€‚ã€‚ã€‚
     switch(Packet.TYPE)
     {
         case BROADCAST:
@@ -242,7 +243,7 @@ static Packet Rx2Pack(RxData *rxdata)//RxDateÎªÊÕµ½µÄ¶ş½øÖÆÏûÏ¢ĞòÁĞ
 
         case ROUTEACK:
         send_pack.route_ack.TYPE = rxdata[0:8];
-        send_pack.route_ack.HOP = rxdata[0:8];//ºóÃæÖ±½Ó¸´ÖÆÁË£¬ÏÂ±êÃ»¸Ä£¬×ÜÖ®ÊÇ¶ÁÈ¡½ÓÊÕ»º´æÖĞ¶ÔÓ¦µÄ²¿·Ö
+        send_pack.route_ack.HOP = rxdata[0:8];//åé¢ç›´æ¥å¤åˆ¶äº†ï¼Œä¸‹æ ‡æ²¡æ”¹ï¼Œæ€»ä¹‹æ˜¯è¯»å–æ¥æ”¶ç¼“å­˜ä¸­å¯¹åº”çš„éƒ¨åˆ†
         send_pack.route_ack.SA = rxdata[0:8];
         send_pack.route_ack.Destination = rxdata[0:8];
         send_pack.route_ack.DA = rxdata[0:8];
@@ -314,8 +315,8 @@ static Packet Rx2Pack(RxData *rxdata)//RxDateÎªÊÕµ½µÄ¶ş½øÖÆÏûÏ¢ĞòÁĞ
     return send_pack;
 }
 
-//ReceiveHandle() Éè¼ÆË¼Â·£º
-static void Route_Broadcast_Handle(Packet *packet,Node_Attribute *attribute) //µ±½ÓÊÕÂ·ÓÉ¹ã²¥Ö¡Ê±²ÉÈ¡µÃ³ö²Ù×÷
+//ReceiveHandle() è®¾è®¡æ€è·¯ï¼š
+static void Route_Broadcast_Handle(Packet *packet,Node_Attribute *attribute) //å½“æ¥æ”¶è·¯ç”±å¹¿æ’­å¸§æ—¶é‡‡å–å¾—å‡ºæ“ä½œ
 {
     if(attribute.Next_Route == 0 && attribute.IF_ROUTE == ROUTE)
     {
@@ -323,7 +324,7 @@ static void Route_Broadcast_Handle(Packet *packet,Node_Attribute *attribute) //µ
         attribute.Next_Route = packet.route_broadcast.SA;
         attribute.SERVER_ID = packet.route_broadcast.SERVER_ADDR;
         Send_Pack send_packet;
-        if(attribute.IF_FRIST_ROUTE == 0){//Èç¹û±¾Éè±¸ÊÇµÚÒ»´Î½ÓÊÕµ½Â·ÓÉ¹ã²¥£¬ÔòÏòÉÏ´«ÊäÒ»¸öÂ·ÓÉ»Ø¸´
+        if(attribute.IF_FRIST_ROUTE == 0){//å¦‚æœæœ¬è®¾å¤‡æ˜¯ç¬¬ä¸€æ¬¡æ¥æ”¶åˆ°è·¯ç”±å¹¿æ’­ï¼Œåˆ™å‘ä¸Šä¼ è¾“ä¸€ä¸ªè·¯ç”±å›å¤
             Route_ACK route_ack;
             Send_Pack send_packet;
             route_ack.TYPE = ROUTEACK;
@@ -334,38 +335,38 @@ static void Route_Broadcast_Handle(Packet *packet,Node_Attribute *attribute) //µ
             send_packet.route_ack = route_ack;
             send_packet.TYPE = ROUTEACK;
 
-            Send_Pack(send_packet);//·¢ËÍÂ·ÓÉ»Ø¸´
+            Send_Pack(send_packet);//å‘é€è·¯ç”±å›å¤
         }
     }
 
-    //£¡£¡£¡ÕâÀïĞèÒª¼ÓÒ»¸öº¯Êı·ÀÖ¹¶ÌÊ±¼äÄÚÖØ¸´½ÓÊÕµ½Â·ÓÉ¹ã²¥È»ºó·´¸´·¢ËÍ
-    //·¢ËÍÂ·ÓÉ¹ã²¥
+    //ï¼ï¼ï¼è¿™é‡Œéœ€è¦åŠ ä¸€ä¸ªå‡½æ•°é˜²æ­¢çŸ­æ—¶é—´å†…é‡å¤æ¥æ”¶åˆ°è·¯ç”±å¹¿æ’­ç„¶ååå¤å‘é€
+    //å‘é€è·¯ç”±å¹¿æ’­
     Route_Broadcast broadcast;
     broadcast.SA = attribute.MAC_ID;
     broadcast.SERVER_ADDR = packet.SERVER_ADDR;
     send_packet.route_broadcast = broadcast;
     send_packet.TYPE = BROADCAST;
 
-    Send_Pack(send_packet);//¹ã²¥Â·ÓÉ¹ã²¥,Broadcast_Packº¯ÊıĞèÒª¶¨Òå
+    Send_Pack(send_packet);//å¹¿æ’­è·¯ç”±å¹¿æ’­,Broadcast_Packå‡½æ•°éœ€è¦å®šä¹‰
 }
 
-static void Route_Ack_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹û½ÓÊÕµ½Â·ÓÉ»Ø¸´
+static void Route_Ack_Handle(Packet *packet,Node_Attribute *attribute)//å¦‚æœæ¥æ”¶åˆ°è·¯ç”±å›å¤
 {
-    if(attribute.MAC_ID == packet.route_ack.DA)//Èç¹ûµ±Ç°½ÚµãÊÇÄ¿µÄ½Úµã(µ±Ç°½ÚµãÎª·şÎñÆ÷)
-    {   uint8 IF_IN_SERVER = 0;//ÅĞ¶Ï¸Ã½ÚµãÊÇ·ñÒÑÔÚ·şÎñÆ÷ÖĞ£¬Èô²»ÔÚ£¬ÔòÌí½ø·şÎñÆ÷ÊôĞÔÖĞ
+    if(attribute.MAC_ID == packet.route_ack.DA)//å¦‚æœå½“å‰èŠ‚ç‚¹æ˜¯ç›®çš„èŠ‚ç‚¹(å½“å‰èŠ‚ç‚¹ä¸ºæœåŠ¡å™¨)
+    {   uint8 IF_IN_SERVER = 0;//åˆ¤æ–­è¯¥èŠ‚ç‚¹æ˜¯å¦å·²åœ¨æœåŠ¡å™¨ä¸­ï¼Œè‹¥ä¸åœ¨ï¼Œåˆ™æ·»è¿›æœåŠ¡å™¨å±æ€§ä¸­
         for(uint16 i = 0; i < attribute.ACC_Number; i++)
         {
            if(attribute.ACC_Node_ID[i] == packet.route_ack.SA) IF_IN_SERVER = 1;
         }
 
-        if(IF_IN_SERVER == 0)//Èç¹û·şÎñÆ÷ÖĞ²»º¬¸ÃÂ·ÓÉµã£¬½«ÆäÌí¼Óµ½·şÎñÆ÷ÖĞ
+        if(IF_IN_SERVER == 0)//å¦‚æœæœåŠ¡å™¨ä¸­ä¸å«è¯¥è·¯ç”±ç‚¹ï¼Œå°†å…¶æ·»åŠ åˆ°æœåŠ¡å™¨ä¸­
         {
             attribute.ACC_Node_ID[attribute.ACC_Number] = packet.route_ack.SA;
             attribute.ACC_Number++;
         }
     }
 
-    else if(attribute.MAC_ID == packet.route_ack.Destination) //Èç¹ûµ±Ç°Éè±¸Ö»ÊÇÖĞ½é½Úµã
+    else if(attribute.MAC_ID == packet.route_ack.Destination) //å¦‚æœå½“å‰è®¾å¤‡åªæ˜¯ä¸­ä»‹èŠ‚ç‚¹
     {
             Route_ACK route_ack;
             Send_Pack send_packet;
@@ -377,11 +378,11 @@ static void Route_Ack_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹û½ÓÊÕ
             send_packet.route_ack = route_ack;
             send_packet.TYPE = ROUTEACK;
 
-            Send_Pack(send_packet);//·¢ËÍÂ·ÓÉ»Ø¸´
+            Send_Pack(send_packet);//å‘é€è·¯ç”±å›å¤
     }
 }
 
-static void Route_Request_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹û½ÓÊÕµ½µÄÊÇÈë´ØÇëÇóÖ¡
+static void Route_Request_Handle(Packet *packet,Node_Attribute *attribute)//å¦‚æœæ¥æ”¶åˆ°çš„æ˜¯å…¥ç°‡è¯·æ±‚å¸§
 {
     if(attribute.IF_CENTER == CENTER && attribute.MAC_ID == packet.route_request.RA)
     {
@@ -391,7 +392,7 @@ static void Route_Request_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹û
             attribute.Cluster_Member[Cluster_Member_Num] = packet.cluster_reply.SA;
             attribute.cluster_membet_access_fail[Cluster_Member_Num] = 0;
             
-            Cluster_Reply send_cluster_reply;//´´½¨Èë´Ø»Ø¸´
+            Cluster_Reply send_cluster_reply;//åˆ›å»ºå…¥ç°‡å›å¤
             send_cluster_reply.TYPE = REPLY;
             send_cluster_reply.RA = packet.cluster_reply.SA;
             send_cluster_reply.SA = attribute.MAC_ID;
@@ -399,14 +400,14 @@ static void Route_Request_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹û
 
             send_packet.cluster_rep = send_cluster_reply;
             send_packet.TYPE = REPLY;
-            Send_Pack(send_packet);//·¢ËÍÈë´Ø»Ø¸´
+            Send_Pack(send_packet);//å‘é€å…¥ç°‡å›å¤
 
             attribute.Cluster_Member_Num++;
         }
     }
 }
 
-static void Route_Reply_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹û½ÓÊÕµ½µÄÊÇÈë´Ø»Ø¸´
+static void Route_Reply_Handle(Packet *packet,Node_Attribute *attribute)//å¦‚æœæ¥æ”¶åˆ°çš„æ˜¯å…¥ç°‡å›å¤
 {
     if(attribute.IF_ADD_CLUSTER == 0 && attribute.MAC_ID == packet.route_reply.RA)
     {
@@ -418,18 +419,18 @@ static void Route_Reply_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹û½Ó
 
 }
 
-static void Beacon_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹ûÊÕµ½µÄÊÇbeaconÖ¡
+static void Beacon_Handle(Packet *packet,Node_Attribute *attribute)//å¦‚æœæ”¶åˆ°çš„æ˜¯beaconå¸§
 {
     if(attribute.CLUSTER_ID == packet.beacon.SA)
     {
         /*
-        ´Ë´¦±¾¸ÃÀûÓÃbeaconÖ¡ÖĞB-CFP¡¢B-CAP¡¢T-Slot¡¢B-SLEEP ½øĞĞÍ¬²½£¬µ«ÎÒ²»Çå³şÈçºÎÊ±ÖÓÈçºÎ½øĞĞÍ¬²½
+        æ­¤å¤„æœ¬è¯¥åˆ©ç”¨beaconå¸§ä¸­B-CFPã€B-CAPã€T-Slotã€B-SLEEP è¿›è¡ŒåŒæ­¥ï¼Œä½†æˆ‘ä¸æ¸…æ¥šå¦‚ä½•æ—¶é’Ÿå¦‚ä½•è¿›è¡ŒåŒæ­¥
         */
 
         uint8 ever_wait_time = SLOT;
-        wait(ever_wait_time * attribute.MAC_ID)//µÈ´ıÃ¿¸öÊ±Ï¶Ê±¼ä*´ØÄÚIDºÅ£¬wait()º¯ÊıÎ´Î´¶¨Òå
+        wait(ever_wait_time * attribute.MAC_ID)//ç­‰å¾…æ¯ä¸ªæ—¶éš™æ—¶é—´*ç°‡å†…IDå·ï¼Œwait()å‡½æ•°æœªæœªå®šä¹‰
         Send_Pack send_packet;
-        //·¢ËÍÊı¾İÖ¡
+        //å‘é€æ•°æ®å¸§
         Data_Pack data;
         data.SA = attribute.MAC_ID;
         data.RA = attribute.CLUSTER_ID;
@@ -439,11 +440,11 @@ static void Beacon_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹ûÊÕµ½µÄÊ
         send_packet.TYPE = DATAPACK;
         Send_Pack(send_packet);
         uint8 beacon_time = TBEACON;
-        uint8 sleep_time = beacon_time - (ever_wait_time * attribute.MAC_ID + ever_wait_time);//Ë¯Ãß£¬Ö±µ½ÏÂÒ»¸öbeaconÖ¡À´Ö®Ç°
-        sleep(sleep_time);//sleep()º¯ÊıÎ´¶¨Òå£¬Éè±¸Ë¯ÃßÒ»¶ÎÊ±¼äºó»½ĞÑ£¬¿ªÊ¼¼àÌı
+        uint8 sleep_time = beacon_time - (ever_wait_time * attribute.MAC_ID + ever_wait_time);//ç¡çœ ï¼Œç›´åˆ°ä¸‹ä¸€ä¸ªbeaconå¸§æ¥ä¹‹å‰
+        sleep(sleep_time);//sleep()å‡½æ•°æœªå®šä¹‰ï¼Œè®¾å¤‡ç¡çœ ä¸€æ®µæ—¶é—´åå”¤é†’ï¼Œå¼€å§‹ç›‘å¬
     }
 
-    else if( attribute.IF_ADD_CLUSTER == 0 || attribute.IF_CENTER == MEMBER)//Èç¹û¸Ã½ÚµãÎ´Èë´Ø£¬Ôò½ÓÊÕµ½beaconºó·¢ËÍÈë´ØÇëÇó
+    else if( attribute.IF_ADD_CLUSTER == 0 || attribute.IF_CENTER == MEMBER)//å¦‚æœè¯¥èŠ‚ç‚¹æœªå…¥ç°‡ï¼Œåˆ™æ¥æ”¶åˆ°beaconåå‘é€å…¥ç°‡è¯·æ±‚
     {
         Send_Pack send_packet;
         Cluster_Request cluster_request;
@@ -457,7 +458,7 @@ static void Beacon_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹ûÊÕµ½µÄÊ
 }
 
 
-static void Communicatin_Ack_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹ûÊÕµ½µÄÊÇÊı¾İÈ·ÈÏÖ¡
+static void Communicatin_Ack_Handle(Packet *packet,Node_Attribute *attribute)//å¦‚æœæ”¶åˆ°çš„æ˜¯æ•°æ®ç¡®è®¤å¸§
 {
     if(attribute.MAC_ID == packet.c_ack.RA )
     {
@@ -465,28 +466,28 @@ static void Communicatin_Ack_Handle(Packet *packet,Node_Attribute *attribute)//È
     }
 }
 
-static void Data_Pack_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹ûÊÕµ½µÄÊÇÊı¾İÖ¡
+static void Data_Pack_Handle(Packet *packet,Node_Attribute *attribute)//å¦‚æœæ”¶åˆ°çš„æ˜¯æ•°æ®å¸§
 {
     if(attribute.MAC_ID == packet.data_pack.RA )
     {
-        if(packet.data_pack.IF_C2C == 0)//Èç¹û¸ÃÊı¾İÖ¡ÊÇÓÃÀ´½øĞĞ´ØÄÚÍ¨ĞÅ,(±¾Éè±¸ÊÇ´ØÍ·)
+        if(packet.data_pack.IF_C2C == 0)//å¦‚æœè¯¥æ•°æ®å¸§æ˜¯ç”¨æ¥è¿›è¡Œç°‡å†…é€šä¿¡,(æœ¬è®¾å¤‡æ˜¯ç°‡å¤´)
         {
             uint8 member_id;
-            for(uint16 i = 0;i < attribute.Cluster_Member_Num;i++) //²éÕÒ½ÓÊÕÊı¾İ¶ÔÓ¦µÄ´ØĞòºÅ
+            for(uint16 i = 0;i < attribute.Cluster_Member_Num;i++) //æŸ¥æ‰¾æ¥æ”¶æ•°æ®å¯¹åº”çš„ç°‡åºå·
             {
                 if(attribute.Cluster_Member[i] == packet.data_pack.SA)
                     member_id = i;
             }
-            attribute.cluster_membet_access_fail[member_id] = 0;//´ØÄÚ¸Ã½Úµã½ÓÊÕÊ§°ÜµÄÂÖ´ÎÇåÁã
+            attribute.cluster_membet_access_fail[member_id] = 0;//ç°‡å†…è¯¥èŠ‚ç‚¹æ¥æ”¶å¤±è´¥çš„è½®æ¬¡æ¸…é›¶
         }
     
-        else //¸ÃÊı¾İÖ¡ÉÏ»ãÊı¾İµ½´ØÊ×£¨±¾Éè±¸ÊÇÂ·ÓÉ½Úµã »ò·şÎñÆ÷£©
+        else //è¯¥æ•°æ®å¸§ä¸Šæ±‡æ•°æ®åˆ°ç°‡é¦–ï¼ˆæœ¬è®¾å¤‡æ˜¯è·¯ç”±èŠ‚ç‚¹ æˆ–æœåŠ¡å™¨ï¼‰
         {   
-            if(attribute.IF_SERVER == SERVER)//Èç¹û±¾Éè±¸ÊÇ·şÎñÆ÷£¬Ôò¸üĞÂÊı¾İ
+            if(attribute.IF_SERVER == SERVER)//å¦‚æœæœ¬è®¾å¤‡æ˜¯æœåŠ¡å™¨ï¼Œåˆ™æ›´æ–°æ•°æ®
             {
                 for(uint16 i = 0;i < MAX_CLUSTER;i++)
                 {
-                    //É¨Ãè£¬Èç¹û½Úµã²»ÔÚ·şÎñÆ÷ÄÚ£¬Ôò½«¸Ã½ÚµãµØÖ·Ìí¼Óµ½·şÎñÆ÷ÖĞ
+                    //æ‰«æï¼Œå¦‚æœèŠ‚ç‚¹ä¸åœ¨æœåŠ¡å™¨å†…ï¼Œåˆ™å°†è¯¥èŠ‚ç‚¹åœ°å€æ·»åŠ åˆ°æœåŠ¡å™¨ä¸­
                     uint8 IF_IN_SERVER = 0;
                     for(uint16 j = 0;i < attribute.ACC_Number;i++)
                     {
@@ -501,16 +502,16 @@ static void Data_Pack_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹ûÊÕµ½
                 }
             }
 
-            else if(attribute.IF_ROUTE = ROUTE)//Èç¹û±¾Éè±¸ÊÇÂ·ÓÉ½ÚµãÔòÏòÉÏ×ª·¢Êı¾İÖ¡
+            else if(attribute.IF_ROUTE = ROUTE)//å¦‚æœæœ¬è®¾å¤‡æ˜¯è·¯ç”±èŠ‚ç‚¹åˆ™å‘ä¸Šè½¬å‘æ•°æ®å¸§
             {
                 Send_Pack send_packet;
-                //»Ø¸´Êı¾İÈ·ÈÏÖ¡
+                //å›å¤æ•°æ®ç¡®è®¤å¸§
                 Communication_ACK com_ack;
                 com_ack.RA =  packet.data_pack.SA;
                 send_packet.c_ack = com_ack;
                 send_packet.TYPE = COMMUNICATEACK;
                 Send_Pack(send_packet);
-                //ÏòÏÂÒ»Ìø×ª·¢Êı¾İÖ¡
+                //å‘ä¸‹ä¸€è·³è½¬å‘æ•°æ®å¸§
                 Data_Pack data_packet;
                 data_packet.RA = attribute.Next_Route;
                 data_packet.SA = attribute.MAC_ID;
@@ -525,7 +526,7 @@ static void Data_Pack_Handle(Packet *packet,Node_Attribute *attribute)//Èç¹ûÊÕµ½
     }    
 }
 
-static void ReceiveHandle(Packet *packet,Node_Attribute *attribute)//¸ù¾İ½ÓÊÕµ½Ö¡µÄ²»Í¬½øĞĞ²»Í¬´¦Àí
+static void ReceiveHandle(Packet *packet,Node_Attribute *attribute)//æ ¹æ®æ¥æ”¶åˆ°å¸§çš„ä¸åŒè¿›è¡Œä¸åŒå¤„ç†
 {   
     switch(packet.TYPE)
     {
@@ -563,12 +564,12 @@ static void ReceiveHandle(Packet *packet,Node_Attribute *attribute)//¸ù¾İ½ÓÊÕµ½Ö
 }
 //************************************************************************************************************
 
-static void appMember(Node_Attribute *attribute)//½ÚµãÎªÆÕÍ¨½Úµã
+static void appMember(Node_Attribute *attribute)//èŠ‚ç‚¹ä¸ºæ™®é€šèŠ‚ç‚¹
 {
     attribute.IF_SERVER = DEVICE; 
 
-    //Éú³ÉÒ»¸ö¸ÅÂÊ£¬Ê¹½Úµã³ÉÎªÂ·ÓÉ½Úµã
-    uint8 random_route = random(10);//´Ë´¦ÓÃÁËÄ¬ÈÏµÄrandom£¬²»ÖªµÀĞĞ²»ĞĞ
+    //ç”Ÿæˆä¸€ä¸ªæ¦‚ç‡ï¼Œä½¿èŠ‚ç‚¹æˆä¸ºè·¯ç”±èŠ‚ç‚¹
+    uint8 random_route = random(10);//æ­¤å¤„ç”¨äº†é»˜è®¤çš„randomï¼Œä¸çŸ¥é“è¡Œä¸è¡Œ
     if(random_route < 2 )
     attribute.IF_ROUTE = ROUTE;
     halLcdWriteLine(HAL_LCD_LINE_1, "Member");
@@ -584,22 +585,22 @@ static void appMember(Node_Attribute *attribute)//½ÚµãÎªÆÕÍ¨½Úµã
       HAL_ASSERT(FALSE);
     }
     basicRfReceiveOn();
-    //ÒÔÉÏÈ¡×Ôlight_switch.c£¬Î´¸Ä¶¯
+    //ä»¥ä¸Šå–è‡ªlight_switch.cï¼Œæœªæ”¹åŠ¨
     
-    uint8 Random_Center = random(CREATE_CLUSTER_LISTEN_TIME);//²úÉúÒ»¸öÔÚ500ÄÚµÄËæ»úÊı
+    uint8 Random_Center = random(CREATE_CLUSTER_LISTEN_TIME);//äº§ç”Ÿä¸€ä¸ªåœ¨500å†…çš„éšæœºæ•°
     uint8 IF_GET_BEACON = 0;
     uint8 IF_MEMBER = 0;
-    //ÉèÖÃÒ»¸ö¶¨Ê±Æ÷
-    while(Set_Timer(Random_Center) && attribute.IF_ADD_CLUSTER == 0)//¶¨Ê±Æ÷£¬µ½Random_CenterÊ±¼äºó·µ»ØTRUE,¸Ãº¯Êı»¹Î´¶¨Òå£¬ĞèÒªĞŞ¸Ä£¡£¡£¡£¡£¡£¡£¡£¡
+    //è®¾ç½®ä¸€ä¸ªå®šæ—¶å™¨
+    while(Set_Timer(Random_Center) && attribute.IF_ADD_CLUSTER == 0)//å®šæ—¶å™¨ï¼Œåˆ°Random_Centeræ—¶é—´åè¿”å›TRUE,è¯¥å‡½æ•°è¿˜æœªå®šä¹‰ï¼Œéœ€è¦ä¿®æ”¹ï¼ï¼ï¼ï¼ï¼ï¼ï¼ï¼
     {
-        //½Úµã¿ªÊ¼¼àÌı£¬ĞèÒª²¹³ä£¡£¡£¡£¡£¡
+        //èŠ‚ç‚¹å¼€å§‹ç›‘å¬ï¼Œéœ€è¦è¡¥å……ï¼ï¼ï¼ï¼ï¼
             while(!basicRfPacketIsReady());
 
             /*
-            ´Ë´¦ÓÃÀ´¶ÁÈ¡»º´æÖĞ½ÓÊÕµ½µÄÊı¾İ
-            Ëæºó½«½ÓÊÕµ½µÄĞòÁĞÒëÎªÖ¡½á¹¹
+            æ­¤å¤„ç”¨æ¥è¯»å–ç¼“å­˜ä¸­æ¥æ”¶åˆ°çš„æ•°æ®
+            éšåå°†æ¥æ”¶åˆ°çš„åºåˆ—è¯‘ä¸ºå¸§ç»“æ„
             */
-            RxData rxdata = GetInformation();//¼ÙÉè RxdataÊÇ¶ş½øÖÆĞòÁĞ½ÓÊÕºóµÄÀàĞÍ
+            RxData rxdata = GetInformation();//å‡è®¾ Rxdataæ˜¯äºŒè¿›åˆ¶åºåˆ—æ¥æ”¶åçš„ç±»å‹
             Send_Pack send_packet = Rx2Pack(RxData)
             
             if(send_packet.TYPE = beacon)
@@ -614,18 +615,18 @@ static void appMember(Node_Attribute *attribute)//½ÚµãÎªÆÕÍ¨½Úµã
         }
     }
 
-    if( IF_GET_BEACON == 1)//Èç¹ûÔÚÆÚ¼äÊÕµ½beaconÖ¡£¬ÔòÔÙ¼àÌı500Ãë£¨µÈ´ıÈë´Ø»Ø¸´£©
+    if( IF_GET_BEACON == 1)//å¦‚æœåœ¨æœŸé—´æ”¶åˆ°beaconå¸§ï¼Œåˆ™å†ç›‘å¬500ç§’ï¼ˆç­‰å¾…å…¥ç°‡å›å¤ï¼‰
     {
         while(!Set_Timer(WAIT_ACK_TIME))
         {
-            //½Úµã¿ªÊ¼¼àÌı£¬ĞèÒª²¹³ä£¡£¡£¡£¡£¡£¡£¡
+            //èŠ‚ç‚¹å¼€å§‹ç›‘å¬ï¼Œéœ€è¦è¡¥å……ï¼ï¼ï¼ï¼ï¼ï¼ï¼
             while(!basicRfPacketIsReady());
 
             /*
-            ´Ë´¦ÓÃÀ´¶ÁÈ¡»º´æÖĞ½ÓÊÕµ½µÄÊı¾İ
-            Ëæºó½«½ÓÊÕµ½µÄĞòÁĞÒëÎªÖ¡½á¹¹
+            æ­¤å¤„ç”¨æ¥è¯»å–ç¼“å­˜ä¸­æ¥æ”¶åˆ°çš„æ•°æ®
+            éšåå°†æ¥æ”¶åˆ°çš„åºåˆ—è¯‘ä¸ºå¸§ç»“æ„
             */
-            RxData rxdata = GetInformation();//¼ÙÉè RxdataÊÇ¶ş½øÖÆĞòÁĞ½ÓÊÕºóµÄÀàĞÍ
+            RxData rxdata = GetInformation();//å‡è®¾ Rxdataæ˜¯äºŒè¿›åˆ¶åºåˆ—æ¥æ”¶åçš„ç±»å‹
             Send_Pack send_packet = Rx2Pack(RxData)
             if(send_packet.TYPE = beacon)
             {
@@ -643,20 +644,20 @@ static void appMember(Node_Attribute *attribute)//½ÚµãÎªÆÕÍ¨½Úµã
         }
     }
 
-    if(IF_MEMBER == 1)//±¾Éè±¸ÎªÆÕÍ¨½Úµã£¬¿ªÊ¼¼àÌı
+    if(IF_MEMBER == 1)//æœ¬è®¾å¤‡ä¸ºæ™®é€šèŠ‚ç‚¹ï¼Œå¼€å§‹ç›‘å¬
     {
         while(!basicRfPacketIsReady());
 
             /*
-            ´Ë´¦ÓÃÀ´¶ÁÈ¡»º´æÖĞ½ÓÊÕµ½µÄÊı¾İ
-            Ëæºó½«½ÓÊÕµ½µÄĞòÁĞÒëÎªÖ¡½á¹¹
+            æ­¤å¤„ç”¨æ¥è¯»å–ç¼“å­˜ä¸­æ¥æ”¶åˆ°çš„æ•°æ®
+            éšåå°†æ¥æ”¶åˆ°çš„åºåˆ—è¯‘ä¸ºå¸§ç»“æ„
             */
-            RxData rxdata = GetInformation();//¼ÙÉè RxdataÊÇ¶ş½øÖÆĞòÁĞ½ÓÊÕºóµÄÀàĞÍ
+            RxData rxdata = GetInformation();//å‡è®¾ Rxdataæ˜¯äºŒè¿›åˆ¶åºåˆ—æ¥æ”¶åçš„ç±»å‹
             Send_Pack send_pack = Rx2Pack(RxData)
-            ReceiveHandle(send_pack,attribute)£» //´Ëº¯ÊıÓÃÀ´¸ù¾İ½ÓÊÕµ½µÄ·Ö×éÀàĞÍ²ÉÈ¡´ëÊ©
+            ReceiveHandle(send_pack,attribute)ï¼› //æ­¤å‡½æ•°ç”¨æ¥æ ¹æ®æ¥æ”¶åˆ°çš„åˆ†ç»„ç±»å‹é‡‡å–æªæ–½
     }
 
-    else//±¾Éè±¸Îª´ØÊ×
+    else//æœ¬è®¾å¤‡ä¸ºç°‡é¦–
     {
         attribute.IF_CENTER == CENTER;
         appCenter(attribute);
@@ -667,7 +668,7 @@ static void appMember(Node_Attribute *attribute)//½ÚµãÎªÆÕÍ¨½Úµã
 /***********************************************************************************
 
 */
-static void appCenter(Node_Attribute *attribute)//½ÚµãÎª´ØÍ·
+static void appCenter(Node_Attribute *attribute)//èŠ‚ç‚¹ä¸ºç°‡å¤´
 {
     halLcdWriteLine(HAL_LCD_LINE_1, "Center");
     halLcdWriteLine(HAL_LCD_LINE_2, "Joystick Push");
@@ -688,17 +689,17 @@ static void appCenter(Node_Attribute *attribute)//½ÚµãÎª´ØÍ·
     // Keep Receiver off when not needed to save power
     basicRfReceiveOff();
 
-    //ÒÔÉÏÄÚÈİÎªÔ­ÎÄ¼şÄÚÈİ
+    //ä»¥ä¸Šå†…å®¹ä¸ºåŸæ–‡ä»¶å†…å®¹
     uint8 ever_time = SLOT;
     uint8 TDMA_Time = ever_time * MAX_CLUSTER;
     uint8 CSMA_Time = 4 * TDMA_Time;
 
     while(TRUE)
     {
-        //·¢ËÍbeaconÖ¡
+        //å‘é€beaconå¸§
         Send_Pack send_packet;
         send_packet.beacon.SA = attribute.MAC_ID;
-        send_packet.beacon.B_CFP = now_time();//now_time()±íÊ¾µ±Ç°Ê±¼ä£¬¸Ãº¯ÊıĞèÒª²¹³ä¶¨Òå»òÌæ»»!!!
+        send_packet.beacon.B_CFP = now_time();//now_time()è¡¨ç¤ºå½“å‰æ—¶é—´ï¼Œè¯¥å‡½æ•°éœ€è¦è¡¥å……å®šä¹‰æˆ–æ›¿æ¢!!!
         send_packet.beacon.B_CAP = now_time() + TDMA_Time;
         send_packet.beacon.B_SLEEP = now_time() + TDMA_Time + CSMA_Time;
         for(uint16 i = 0;i < MAX_CLUSTER; i++)
@@ -712,21 +713,21 @@ static void appCenter(Node_Attribute *attribute)//½ÚµãÎª´ØÍ·
         send_packet.TYPE = BEACON;
         Send_Pack(send_packet);
 
-        while(Set_Timer(TDMA_Time))//¿ªÊ¼TDMA
+        while(Set_Timer(TDMA_Time))//å¼€å§‹TDMA
         {
             while(!basicRfPacketIsReady());
 
-            //¿ªÊ¼ÕìÌı£¬ĞèÒª²¹³ä£¡£¡£¡£¡£¡
+            //å¼€å§‹ä¾¦å¬ï¼Œéœ€è¦è¡¥å……ï¼ï¼ï¼ï¼ï¼
             /*
-            ´Ë´¦ÓÃÀ´¶ÁÈ¡»º´æÖĞ½ÓÊÕµ½µÄÊı¾İ
-            Ëæºó½«½ÓÊÕµ½µÄĞòÁĞÒëÎªÖ¡½á¹¹
+            æ­¤å¤„ç”¨æ¥è¯»å–ç¼“å­˜ä¸­æ¥æ”¶åˆ°çš„æ•°æ®
+            éšåå°†æ¥æ”¶åˆ°çš„åºåˆ—è¯‘ä¸ºå¸§ç»“æ„
             */
-            RxData rxdata = GetInformation();//¼ÙÉè RxdataÊÇ¶ş½øÖÆĞòÁĞ½ÓÊÕºóµÄÀàĞÍ
+            RxData rxdata = GetInformation();//å‡è®¾ Rxdataæ˜¯äºŒè¿›åˆ¶åºåˆ—æ¥æ”¶åçš„ç±»å‹
             Send_Pack send_pack = Rx2Pack(RxData)
-            if(send_pack.TYPE == DATAPACK)//TDMA¹ı³ÌÖĞÖ»ÄÜ½ÓÊÕÊı¾İÖ¡
-                ReceiveHandle(send_pack,attribute)£» //´Ëº¯ÊıÓÃÀ´¸ù¾İ½ÓÊÕµ½µÄ·Ö×éÀàĞÍ²ÉÈ¡´ëÊ©
+            if(send_pack.TYPE == DATAPACK)//TDMAè¿‡ç¨‹ä¸­åªèƒ½æ¥æ”¶æ•°æ®å¸§
+                ReceiveHandle(send_pack,attribute)ï¼› //æ­¤å‡½æ•°ç”¨æ¥æ ¹æ®æ¥æ”¶åˆ°çš„åˆ†ç»„ç±»å‹é‡‡å–æªæ–½
         }
-        //½«´ØÄÚĞÅÏ¢´ò°ü£¬·¢ËÍÊı¾İÖ¡
+        //å°†ç°‡å†…ä¿¡æ¯æ‰“åŒ…ï¼Œå‘é€æ•°æ®å¸§
         send_packet.data_pack.SA = attribute.MAC_ID;
         send_packet.data_pack.RA = attribute.Next_Route;
         send_packet.data_pack.Data_Body[0] = attribute.MAC_ID;
@@ -737,17 +738,17 @@ static void appCenter(Node_Attribute *attribute)//½ÚµãÎª´ØÍ·
         send_packet.TYPE = DATAPACK;
         Send_Pack(send_packet);
         
-        while(Set_Timer(CSMA_Time)) //¿ªÊ¼¾ºÕù½ÓÈëÖÜÆÚ
+        while(Set_Timer(CSMA_Time)) //å¼€å§‹ç«äº‰æ¥å…¥å‘¨æœŸ
         {
             while(!basicRfPacketIsReady());
-            //¿ªÊ¼ÕìÌı£¬ĞèÒª²¹³ä£¡£¡£¡£¡£¡
+            //å¼€å§‹ä¾¦å¬ï¼Œéœ€è¦è¡¥å……ï¼ï¼ï¼ï¼ï¼
             /*
-            ´Ë´¦ÓÃÀ´¶ÁÈ¡»º´æÖĞ½ÓÊÕµ½µÄÊı¾İ
-            Ëæºó½«½ÓÊÕµ½µÄĞòÁĞÒëÎªÖ¡½á¹¹
+            æ­¤å¤„ç”¨æ¥è¯»å–ç¼“å­˜ä¸­æ¥æ”¶åˆ°çš„æ•°æ®
+            éšåå°†æ¥æ”¶åˆ°çš„åºåˆ—è¯‘ä¸ºå¸§ç»“æ„
             */
-            RxData rxdata = GetInformation();//¼ÙÉè RxdataÊÇ¶ş½øÖÆĞòÁĞ½ÓÊÕºóµÄÀàĞÍ
+            RxData rxdata = GetInformation();//å‡è®¾ Rxdataæ˜¯äºŒè¿›åˆ¶åºåˆ—æ¥æ”¶åçš„ç±»å‹
             Send_Pack send_pack = Rx2Pack(RxData)
-            ReceiveHandle(send_pack,attribute)£» //´Ëº¯ÊıÓÃÀ´¸ù¾İ½ÓÊÕµ½µÄ·Ö×éÀàĞÍ²ÉÈ¡´ëÊ© 
+            ReceiveHandle(send_pack,attribute)ï¼› //æ­¤å‡½æ•°ç”¨æ¥æ ¹æ®æ¥æ”¶åˆ°çš„åˆ†ç»„ç±»å‹é‡‡å–æªæ–½ 
         }
     }
 }
@@ -755,7 +756,7 @@ static void appCenter(Node_Attribute *attribute)//½ÚµãÎª´ØÍ·
 /***********************************************************************************
 */
 
-static void appServer(Node_Attribute *attribute)//½ÚµãÎª·şÎñÆ÷
+static void appServer(Node_Attribute *attribute)//èŠ‚ç‚¹ä¸ºæœåŠ¡å™¨
 {
     halLcdWriteLine(HAL_LCD_LINE_1, "Server");
     halLcdWriteLine(HAL_LCD_LINE_2, "Ready");
@@ -765,34 +766,34 @@ static void appServer(Node_Attribute *attribute)//½ÚµãÎª·şÎñÆ÷
 #endif
 
     // Initialize BasicRF
-    basicRfConfig.myAddr = attribute.MAC_ADDR;
+    basicRfConfig.myAddr = SERVER_ADDR;
     if(basicRfInit(&basicRfConfig)==FAILED) {
       HAL_ASSERT(FALSE);
     }
     basicRfReceiveOn();
-    //ÒÔÉÏÊÇÔ­ÎÄ¼şµÄ´úÂë
+    //ä»¥ä¸Šæ˜¯åŸæ–‡ä»¶çš„ä»£ç 
 
     attribute.IF_SERVER = SERVER;
     while(TRUE)
     {
-            while(Set_Timer(START_ROUTE_TIME)) //ÔÚ·¢ËÍÂ·ÓÉ¹ã²¥Ç°±£´æ¼àÌı×´Ì¬
+            while(Set_Timer(START_ROUTE_TIME)) //åœ¨å‘é€è·¯ç”±å¹¿æ’­å‰ä¿å­˜ç›‘å¬çŠ¶æ€
         {
             while(!basicRfPacketIsReady());
-            //¿ªÊ¼ÕìÌı£¬ĞèÒª²¹³ä£¡£¡£¡£¡£¡
+            //å¼€å§‹ä¾¦å¬ï¼Œéœ€è¦è¡¥å……ï¼ï¼ï¼ï¼ï¼
             /*
-            ´Ë´¦ÓÃÀ´¶ÁÈ¡»º´æÖĞ½ÓÊÕµ½µÄÊı¾İ
-            Ëæºó½«½ÓÊÕµ½µÄĞòÁĞÒëÎªÖ¡½á¹¹
+            æ­¤å¤„ç”¨æ¥è¯»å–ç¼“å­˜ä¸­æ¥æ”¶åˆ°çš„æ•°æ®
+            éšåå°†æ¥æ”¶åˆ°çš„åºåˆ—è¯‘ä¸ºå¸§ç»“æ„
             */
-            RxData rxdata = GetInformation();//¼ÙÉè RxdataÊÇ¶ş½øÖÆĞòÁĞ½ÓÊÕºóµÄÀàĞÍ
+            RxData rxdata = GetInformation();//å‡è®¾ Rxdataæ˜¯äºŒè¿›åˆ¶åºåˆ—æ¥æ”¶åçš„ç±»å‹
             Send_Pack send_pack = Rx2Pack(RxData)
-            ReceiveHandle(send_pack,attribute)£» //´Ëº¯ÊıÓÃÀ´¸ù¾İ½ÓÊÕµ½µÄ·Ö×éÀàĞÍ²ÉÈ¡´ëÊ© 
+            ReceiveHandle(send_pack,attribute)ï¼› //æ­¤å‡½æ•°ç”¨æ¥æ ¹æ®æ¥æ”¶åˆ°çš„åˆ†ç»„ç±»å‹é‡‡å–æªæ–½ 
         }
 
-        //¼àÌıÒ»¶ÎÊ±¼äºó·¢ËÍÂ·ÓÉ¹ã²¥
+        //ç›‘å¬ä¸€æ®µæ—¶é—´åå‘é€è·¯ç”±å¹¿æ’­
 
         Send_Pack send_packet;
         send_packet.route_broadcast.SA = attribute.MAC_ID;
-        send_packet.route_broadcast.DA = 0;//±íÊ¾½ÓÊÕµãÊÇËùÓĞ½Úµã
+        send_packet.route_broadcast.DA = 0;//è¡¨ç¤ºæ¥æ”¶ç‚¹æ˜¯æ‰€æœ‰èŠ‚ç‚¹
         send_packet.TYPE = BROADCAST;
         Send_Pack(send_packet);
     }
@@ -812,15 +813,19 @@ static void appServer(Node_Attribute *attribute)//½ÚµãÎª·şÎñÆ÷
 */
 void main(void)
 {
-    uint8 appMode = DEVICE;//½ÇÉ«³õÊ¼»¯ÎªÆÕÍ¨Éè±¸
+    uint8 appMode = DEVICE;//è§’è‰²åˆå§‹åŒ–ä¸ºæ™®é€šè®¾å¤‡
 
     // Config basicRF
-    basicRfConfig.panId = DEFAULT_PAN_ID;//³õÊ¼»¯½Úµã¶¼ÎªÍ¬Ò»¸öPAN_ID
-    basicRfConfig.channel = RF_CHANNEL;// ¶¼ÎªÍ¬Ò»¸öĞÅµÀ
-    basicRfConfig.ackRequest = FALSE;// ²»²ÉÓÃÄ¬ÈÏµÄack£¬ÎÒÃÇ×Ô¼ºĞ´
+    basicRfConfig.panId = PAN_ID;
+    basicRfConfig.channel = RF_CHANNEL;
+    basicRfConfig.ackRequest = TRUE;
+#ifdef SECURITY_CCM
+    basicRfConfig.securityKey = key;
+#endif
 
     // Initalise board peripherals
     halBoardInit();
+    halJoystickInit();
 
     // Initalise hal_rf
     if(halRfInit()==FAILED) {
@@ -830,12 +835,17 @@ void main(void)
     // Indicate that device is powered
     halLedSet(1);
 
+    // Print Logo and splash screen on LCD
+    utilPrintLogo("MCLight");
+
+    // Wait for user to press S1 to enter menu
+    while (halButtonPushed()!=HAL_BUTTON_1);
     halMcuWaitMs(350);
     halLcdClear();
-    //Ç°ÃæÊÇ³õÊ¼»¯ÄÚÈİ£¬ÑØÓÃlight_switch.c ÄÚÈİ£¬²»ÖªµÀÊÇ²»ÊÇÒªĞŞ¸Ä
+    //å‰é¢æ˜¯åˆå§‹åŒ–å†…å®¹ï¼Œæ²¿ç”¨light_switch.c å†…å®¹ï¼Œä¸çŸ¥é“æ˜¯ä¸æ˜¯è¦ä¿®æ”¹
 
 
-    Node_Attribute *attribute;//½ÚµãÊôĞÔ³õÊ¼»¯
+    Node_Attribute *attribute;//èŠ‚ç‚¹å±æ€§åˆå§‹åŒ–
     attribute.MAC_ID = MAC_ADDR;
     attribute.IF_ROUTE = NONE;
     attribute.IF_CENTER = MEMBER;
@@ -844,8 +854,9 @@ void main(void)
     attribute.IF_FRIST_ROUTE = 0;
     attribute.IF_ADD_CLUSTER = 0;
 
-    // ÉèÖÃ½Úµã½ÇÉ«(·şÎñÆ÷/ÆÕÍ¨½Úµã)DEVICE|SERVER
-    appMode = DEVICE;
+    // è®¾ç½®èŠ‚ç‚¹è§’è‰²(æœåŠ¡å™¨/æ™®é€šèŠ‚ç‚¹)
+    appMode = appSelectRole();
+    halLcdClear(attribute);
 
     // Transmitter application
     if(appMode == DEVICE) {
@@ -859,6 +870,16 @@ void main(void)
     HAL_ASSERT(FALSE);
 }
 
+
+/****************************************************************************************
+è®¾ç½®èŠ‚ç‚¹æ˜¯å¦æ˜¯æœåŠ¡å™¨
+*/
+static uint8 appSelectRole(void)//
+{
+    halLcdWriteLine(1, "Device Mode: ");
+
+    return utilMenuSelect(&pMenu);
+}
 
 /****************************************************************************************
 
