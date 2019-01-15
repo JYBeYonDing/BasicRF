@@ -155,14 +155,14 @@ static void appLight()
 
     // Main loop
     while (TRUE) {
-        //while(!basicRfPacketIsReady());// wait until receive a packet
-        //if(basicRfReceive(pRxData, APP_PAYLOAD_LENGTH, NULL)>0) {
+        while(!basicRfPacketIsReady());// wait until receive a packet
+        if(basicRfReceive(pRxData, APP_PAYLOAD_LENGTH, NULL)>0) {
 
             uartSentTime();// 发送此时单片机时间
             if(pRxData[0] == LIGHT_TOGGLE_CMD) {
                 halLedToggle(1);
             }
-        //}
+        }
     }
 }
 
