@@ -20,12 +20,13 @@
 #include <hal_assert.h>
 #include <hal_board.h>
 #include <hal_int.h>
+#include "hal_timer_32k.h"
 #include "hal_mcu.h"
 #include "hal_button.h"
 #include "hal_rf.h"
 #include "util_lcd.h"
 #include "basic_rf.h"
-
+#include "UART.H"
 
 /***********************************************************************************
 * CONSTANTS
@@ -56,6 +57,9 @@
 static uint8 pTxData[APP_PAYLOAD_LENGTH];
 static uint8 pRxData[APP_PAYLOAD_LENGTH];
 static basicRfCfg_t basicRfConfig;
+
+static unsigned long timeCurrent = 0;//单片机当前时刻，单位ms
+static unsigned char timeData[11];// 将整形时间转换成字符串
 
 // Mode menu
 static menuItem_t pMenuItems[] =
@@ -92,6 +96,40 @@ static uint8 key[]= {
 static void appLight();
 static void appSwitch();
 static uint8 appSelectMode(void);
+static void appTimerISR(void);//定时器中断服务程序
+
+
+/***********************************************************************************
+* @fn          appTimerISR
+*
+* @brief       32KHz timer interrupt service routine. Signals PER test transmitter
+*              application to transmit a packet by setting application state.
+*
+* @param       none
+*
+* @return      none
+*/
+static void appTimerISR(void)
+{
+    timeCurrent++;
+}
+
+
+/***********************************************************************************
+* @fn          appConfigTimer
+*
+* @brief       Configure timer interrupts for application. Uses 32KHz timer
+*
+* @param       uint16 rate - Frequency of timer interrupt. This value must be
+*              between 1 and 32768 Hz
+*
+* @return      none
+*/
+static void appConfigTimer(uint16 rate)
+{
+    halTimer32kInit(TIMER_32K_CLK_FREQ/rate);
+    halTimer32kIntConnect(&appTimerISR);
+}
 
 
 /***********************************************************************************
@@ -118,6 +156,9 @@ static void appLight()
     while (TRUE) {
         while(!basicRfPacketIsReady());// wait until receive a packet
         if(basicRfReceive(pRxData, APP_PAYLOAD_LENGTH, NULL)>0) {
+          // 将整形转换为字符串输出
+            uint32_2char(timeCurrent, timeData);
+            UartSendString(timeData,10);
             if(pRxData[0] == LIGHT_TOGGLE_CMD) {
                 halLedToggle(1);
             }
@@ -187,6 +228,9 @@ void main(void)
 {
     uint8 appMode = NONE;
 
+    InitUart();//串口初始化，用来向上位机输出一些信息
+    appConfigTimer(1000);//约等于每秒1000次，即一次间隔1ms
+    
     // Config basicRF
     basicRfConfig.panId = PAN_ID;
     basicRfConfig.channel = RF_CHANNEL;
