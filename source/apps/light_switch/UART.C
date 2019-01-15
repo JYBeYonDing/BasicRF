@@ -37,8 +37,8 @@ void uint32_2char(unsigned long num,unsigned char *Data)
 {
   int len = 10;//32无符号整形最大值长度为10
   while(len>0){
-    Data[10-len] = num%10;// 这里存放顺序根据串口显示需要调整
+    Data[--len] = num%10 + '0';// 这里存放顺序根据串口显示需要调整
     num /= 10;
-    len--;
   }
+  Data[10]= '\0';
 }

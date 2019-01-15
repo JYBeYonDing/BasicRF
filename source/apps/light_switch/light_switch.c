@@ -97,6 +97,7 @@ static void appLight();
 static void appSwitch();
 static uint8 appSelectMode(void);
 static void appTimerISR(void);//定时器中断服务程序
+static void uartSentTime();//发送单片机此时的时间
 
 
 /***********************************************************************************
@@ -154,15 +155,14 @@ static void appLight()
 
     // Main loop
     while (TRUE) {
-        while(!basicRfPacketIsReady());// wait until receive a packet
-        if(basicRfReceive(pRxData, APP_PAYLOAD_LENGTH, NULL)>0) {
-          // 将整形转换为字符串输出
-            uint32_2char(timeCurrent, timeData);
-            UartSendString(timeData,10);
+        //while(!basicRfPacketIsReady());// wait until receive a packet
+        //if(basicRfReceive(pRxData, APP_PAYLOAD_LENGTH, NULL)>0) {
+
+            uartSentTime();// 发送此时单片机时间
             if(pRxData[0] == LIGHT_TOGGLE_CMD) {
                 halLedToggle(1);
             }
-        }
+        //}
     }
 }
 
@@ -230,6 +230,7 @@ void main(void)
 
     InitUart();//串口初始化，用来向上位机输出一些信息
     appConfigTimer(1000);//约等于每秒1000次，即一次间隔1ms
+    halTimer32kIntEnable();//开启timer1中断
     
     // Config basicRF
     basicRfConfig.panId = PAN_ID;
@@ -265,6 +266,17 @@ static uint8 appSelectMode(void)
 
     return utilMenuSelect(&pMenu);
 }
+
+
+
+static void uartSentTime(){
+  // 将整形转换为字符串输出
+  uint32_2char(timeCurrent, timeData);
+  UartSendString(timeData,10);
+  UartSendString("\r\n",2);
+  
+}
+
 
 /****************************************************************************************
   Copyright 2007 Texas Instruments Incorporated. All rights reserved.
