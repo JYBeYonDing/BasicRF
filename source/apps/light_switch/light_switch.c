@@ -289,9 +289,9 @@ static void uartSentSrc(){
     basicRfGetSrcPanId(&srcPanId);
     uint16_2char(srcPanId,srcPanIdData);
     UartSendString("srcPanId:",9);
-    UartSendString(srcAddrData,5);
-    UartSendString("srcAddr:",8);
     UartSendString(srcPanIdData,5);
+    UartSendString("srcAddr:",8);
+    UartSendString(srcAddrData,5);
     UartSendString("\r\n",2);
 }
 /****************************************************************************************
