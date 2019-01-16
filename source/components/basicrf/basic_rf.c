@@ -263,6 +263,7 @@ static void basicRfRxFrmDoneIsr(void)
     	UINT16_NTOH(pHdr->srcAddr);
 
         rxi.ackRequest = !!(pHdr->fcf0 & BASIC_RF_FCF_ACK_BM_L);
+        rxi.srcPanId = pHdr->panId;
 
         // Read the status word and check for CRC OK
         pStatusWord= rxMpdu + 4;
@@ -291,6 +292,7 @@ static void basicRfRxFrmDoneIsr(void)
 
         // Read the source address
         rxi.srcAddr= pHdr->srcAddr;
+        rxi.srcPanId = pHdr->panId;
 
         // Read the packet payload
         rxi.pPayload = rxMpdu + BASIC_RF_HDR_SIZE;
