@@ -524,6 +524,20 @@ void basicRfGetSrcPanId(uint16* srcPanId)
 }
 
 /**********************************************************************************
+* @fn          basicRfGetSeqNumber
+*
+* @brief       得到信号的消息序号
+*
+* @param       
+*
+* @return      
+*/
+void basicRfGetSeqNumber(uint8* seqNumber)
+{
+    (*seqNumber) = rxi.seqNumber;
+}
+
+/**********************************************************************************
 * @fn          basicRfGetRssi
 *
 * @brief       Copies the payload of the last incoming packet into a buffer

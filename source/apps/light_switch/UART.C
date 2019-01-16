@@ -33,22 +33,37 @@ void UartSendString(unsigned char *Data, int len)
 }
 
 
-void uint32_2char(unsigned long num,unsigned char *Data)
-{
-  int len = 10;//32无符号整形最大值长度为10
-  while(len>0){
-    Data[--len] = num%10 + '0';// 这里存放顺序根据串口显示需要调整
-    num /= 10;
-  }
-  Data[10]= '\0';
-}
+// void uint32_2char(unsigned long num,unsigned char *Data)
+// {
+//   int len = 10;//32无符号整形最大值长度为10
+//   while(len>0){
+//     Data[--len] = num%10 + '0';// 这里存放顺序根据串口显示需要调整
+//     num /= 10;
+//   }
+//   Data[10]= '\0';
+// }
 
-void uint16_2char(unsigned long num,unsigned char *Data)
+// void uint16_2char(unsigned long num,unsigned char *Data)
+// {
+//   int len = 5;//16无符号整形最大值长度为5
+//   while(len>0){
+//     Data[--len] = num%10 + '0';// 这里存放顺序根据串口显示需要调整
+//     num /= 10;
+//   }
+//   Data[5]= '\0';
+// }
+
+/**
+ * 将无符号整型转换成字符串
+ * uint32 ： len=10;//32无符号整形最大值长度为10
+ * uint16 :  len = 5;//16无符号整形最大值长度为5
+ * uint8  :  len = 3;//8无符号整形最大值长度为3
+ */
+void uint2char(unsigned long num,unsigned char *Data,int len)
 {
-  int len = 5;//16无符号整形最大值长度为5
   while(len>0){
     Data[--len] = num%10 + '0';// 这里存放顺序根据串口显示需要调整
     num /= 10;
   }
-  Data[5]= '\0';
+  Data[len]= '\0';
 }

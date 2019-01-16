@@ -64,6 +64,8 @@ static uint16 srcAddr;//记录收到的信号的发射源id
 static unsigned char srcAddrData[6];// 将整型转换成字符串
 static uint16 srcPanId;//记录收到信号的panId
 static unsigned char srcPanIdData[6];// 将整型转换成字符串
+static uint8 srcSeqNumber;//记录接收到的消息的序号
+static unsigned char srcSeqNumberData[3];// 将整型转换成字符串
 
 // Mode menu
 static menuItem_t pMenuItems[] =
@@ -276,7 +278,7 @@ static uint8 appSelectMode(void)
 
 static void uartSentTime(){
   // 将整形转换为字符串输出
-  uint32_2char(timeCurrent, timeData);
+  uint2char(timeCurrent, timeData,10);
   UartSendString(timeData,10);
   UartSendString("::",2);
   
@@ -285,13 +287,17 @@ static void uartSentTime(){
 //发送信号来源
 static void uartSentSrc(){
     basicRfGetSrcAddr(&srcAddr);
-    uint16_2char(srcAddr,srcAddrData);
+    uint2char(srcAddr,srcAddrData,5);
     basicRfGetSrcPanId(&srcPanId);
-    uint16_2char(srcPanId,srcPanIdData);
+    uint2char(srcPanId,srcPanIdData,5);
+    basicRfGetSeqNumber(srcSeqNumber);
+    uint2char(srcSeqNumber,srcSeqNumberData,3);
     UartSendString("srcPanId:",9);
     UartSendString(srcPanIdData,5);
     UartSendString("srcAddr:",8);
     UartSendString(srcAddrData,5);
+    UartSendString("srcSeqNumber:",13);
+    UartSendString(srcSeqNumberData,3);
     UartSendString("\r\n",2);
 }
 /****************************************************************************************
