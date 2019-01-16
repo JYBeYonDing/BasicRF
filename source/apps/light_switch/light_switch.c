@@ -35,8 +35,8 @@
 #define RF_CHANNEL                25      // 2.4 GHz RF channel
 
 // BasicRF address definitions
-#define PAN_ID                0x2007
-#define SWITCH_ADDR           0x2520
+#define PAN_ID                0x0001
+#define SWITCH_ADDR           0x0001
 #define LIGHT_ADDR            0xBEEF
 #define APP_PAYLOAD_LENGTH        1
 #define LIGHT_TOGGLE_CMD          0
@@ -59,7 +59,11 @@ static uint8 pRxData[APP_PAYLOAD_LENGTH];
 static basicRfCfg_t basicRfConfig;
 
 static unsigned long timeCurrent = 0;//单片机当前时刻，单位ms
-static unsigned char timeData[11];// 将整形时间转换成字符串
+static unsigned char timeData[11];// 将整型时间转换成字符串
+static uint16 srcAddr;//记录收到的信号的发射源id
+static unsigned char srcAddrData[6];// 将整型转换成字符串
+static uint16 srcPanId;//记录收到信号的panId
+static unsigned char srcPanIdData[6];// 将整型转换成字符串
 
 // Mode menu
 static menuItem_t pMenuItems[] =
@@ -98,6 +102,7 @@ static void appSwitch();
 static uint8 appSelectMode(void);
 static void appTimerISR(void);//定时器中断服务程序
 static void uartSentTime();//发送单片机此时的时间
+static void uartSentSrc();//发送信号来源
 
 
 /***********************************************************************************
@@ -157,8 +162,8 @@ static void appLight()
     while (TRUE) {
         while(!basicRfPacketIsReady());// wait until receive a packet
         if(basicRfReceive(pRxData, APP_PAYLOAD_LENGTH, NULL)>0) {
-
             uartSentTime();// 发送此时单片机时间
+            uartSentSrc();// 发送消息来源
             if(pRxData[0] == LIGHT_TOGGLE_CMD) {
                 halLedToggle(1);
             }
@@ -273,11 +278,22 @@ static void uartSentTime(){
   // 将整形转换为字符串输出
   uint32_2char(timeCurrent, timeData);
   UartSendString(timeData,10);
-  UartSendString("\r\n",2);
+  UartSendString("::",2);
   
 }
 
-
+//发送信号来源
+static void uartSentSrc(){
+    basicRfGetSrcAddr(&srcAddr);
+    uint16_2char(srcAddr,srcAddrData);
+    basicRfGetSrcPanId(&srcPanId);
+    uint16_2char(srcPanId,srcPanIdData);
+    UartSendString("srcPanId:",9);
+    UartSendString(srcAddrData,5);
+    UartSendString("srcAddr:",8);
+    UartSendString(srcPanIdData,5);
+    UartSendString("\r\n",2);
+}
 /****************************************************************************************
   Copyright 2007 Texas Instruments Incorporated. All rights reserved.
 

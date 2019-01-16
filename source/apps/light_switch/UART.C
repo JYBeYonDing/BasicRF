@@ -42,3 +42,13 @@ void uint32_2char(unsigned long num,unsigned char *Data)
   }
   Data[10]= '\0';
 }
+
+void uint16_2char(unsigned long num,unsigned char *Data)
+{
+  int len = 6;//16无符号整形最大值长度为5
+  while(len>0){
+    Data[--len] = num%10 + '0';// 这里存放顺序根据串口显示需要调整
+    num /= 10;
+  }
+  Data[5]= '\0';
+}

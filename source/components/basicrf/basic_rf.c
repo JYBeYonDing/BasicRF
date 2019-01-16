@@ -494,6 +494,34 @@ uint8 basicRfReceive(uint8* pRxData, uint8 len, int16* pRssi)
 
 
 /**********************************************************************************
+* @fn          basicRfGetSrcAddr
+*
+* @brief       µÃµ½ÐÅºÅµÄ·¢ËÍµØÖ·¼´idºÅ
+*
+* @param       
+*
+* @return      
+*/
+void basicRfGetSrcAddr(uint16* srcAddr)
+{
+    (*srcAddr) = rxi.srcAddr;
+}
+
+/**********************************************************************************
+* @fn          basicRfGetSrcPanId
+*
+* @brief       µÃµ½ÐÅºÅµÄ·¢ËÍpanId
+*
+* @param       
+*
+* @return      
+*/
+void basicRfGetSrcPanId(uint16* srcPanId)
+{
+    (*srcPanId) = rxi.srcPanId;
+}
+
+/**********************************************************************************
 * @fn          basicRfGetRssi
 *
 * @brief       Copies the payload of the last incoming packet into a buffer
@@ -561,7 +589,7 @@ void basicRfReceiveOff(void)
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿? WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
