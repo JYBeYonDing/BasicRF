@@ -61,9 +61,10 @@ void UartSendString(unsigned char *Data, int len)
  */
 void uint2char(unsigned long num,unsigned char *Data,int len)
 {
+  Data[len]= '\0';
   while(len>0){
     Data[--len] = num%10 + '0';// 这里存放顺序根据串口显示需要调整
     num /= 10;
   }
-  Data[len]= '\0';
+  
 }

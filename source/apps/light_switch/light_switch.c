@@ -58,14 +58,14 @@ static uint8 pTxData[APP_PAYLOAD_LENGTH];
 static uint8 pRxData[APP_PAYLOAD_LENGTH];
 static basicRfCfg_t basicRfConfig;
 
-static unsigned long timeCurrent = 0;//单片机当前时刻，单位ms
+static unsigned long timeCurrent;//单片机当前时刻，单位ms
 static unsigned char timeData[11];// 将整型时间转换成字符串
 static uint16 srcAddr;//记录收到的信号的发射源id
 static unsigned char srcAddrData[6];// 将整型转换成字符串
 static uint16 srcPanId;//记录收到信号的panId
 static unsigned char srcPanIdData[6];// 将整型转换成字符串
 static uint8 srcSeqNumber;//记录接收到的消息的序号
-static unsigned char srcSeqNumberData[3];// 将整型转换成字符串
+static unsigned char srcSeqNumberData[4];// 将整型转换成字符串
 
 // Mode menu
 static menuItem_t pMenuItems[] =
@@ -286,11 +286,11 @@ static void uartSentTime(){
 
 //发送信号来源
 static void uartSentSrc(){
-    basicRfGetSrcAddr(&srcAddr);
-    uint2char(srcAddr,srcAddrData,5);
     basicRfGetSrcPanId(&srcPanId);
+    basicRfGetSrcAddr(&srcAddr);
+    basicRfGetSeqNumber(&srcSeqNumber);
     uint2char(srcPanId,srcPanIdData,5);
-    basicRfGetSeqNumber(srcSeqNumber);
+    uint2char(srcAddr,srcAddrData,5);
     uint2char(srcSeqNumber,srcSeqNumberData,3);
     UartSendString("srcPanId:",9);
     UartSendString(srcPanIdData,5);
